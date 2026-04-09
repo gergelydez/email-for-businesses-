@@ -70,7 +70,7 @@ export default function CampaignPage() {
   // ── Add to leads list ─────────────────────────────────────────────────────
   const handleAdd = (biz: Business) => {
     addLeads([biz])
-    setAdded(prev => new Set([...prev, biz.place_id]))
+    setAdded(prev => new Set(Array.from(prev).concat(biz.place_id)))
   }
 
   const handleAddAll = () => {
