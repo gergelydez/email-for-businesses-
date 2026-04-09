@@ -1,165 +1,185 @@
-# Setup & Utilizare - Business Outreach Automator
+# Business Outreach Automator v2.0 🇷🇴
 
-## Ce face acest tool?
-
-1. **Gaseste** afaceri locale din Romania (pe Google Maps) care NU au website
-2. **Gaseste** adresele de email ale acestor afaceri
-3. **Genereaza** emailuri de vanzare ultra-personalizate cu Claude AI (diferite pentru restaurant vs dentist vs service auto etc.)
-4. **Trimite** emailurile automat cu delay anti-spam
-5. **Inregistreaza** tot intr-un log CSV ca sa nu contactezi aceeasi afacere de doua ori
+Gaseste afaceri din Romania fara website si trimite-le oferte personalizate prin **WhatsApp** sau Email.
 
 ---
 
-## Setup rapid (5 minute)
+## De ce WhatsApp (nu Email)?
 
-### 1. Instaleaza dependentele
+| | WhatsApp | Email |
+|---|---|---|
+| Rata deschidere | **98%** | 20% |
+| Email disponibil in Google Places | 5% | - |
+| Parere ca spam | Rara | Frecventa |
+| Raspuns in aceeasi zi | **DA** | Rar |
+
+**Concluzie:** Email-ul lipseste din aproape toate listingurile Google. WhatsApp e calea directa.
+
+---
+
+## Instalare (5 minute)
 
 ```bash
+cd scripts/
 pip install -r requirements.txt
+cp ../.env.example ../.env
+# Editeaza .env cu datele tale
 ```
 
-### 2. Copiaza fisierul de configurare
+---
+
+## Configurare .env
+
+**Obligatoriu:**
+- `GOOGLE_PLACES_API_KEY` → https://console.cloud.google.com/ (activeaza Places API)
+- `ANTHROPIC_API_KEY` → https://console.anthropic.com/
+- `SENDER_NAME`, `YOUR_PHONE`, `YOUR_WEBSITE`, `YOUR_PORTFOLIO_URL`
+
+**Setari campanie:**
+- `TARGET_CITIES` → orase mari tinta
+- `TARGET_SMALL_CITIES` → lasa gol = se adauga automat localitati mici din jur
+- `TARGET_CATEGORIES` → tipuri de afaceri (vezi lista mai jos)
+- `PRICE_FROM`, `PRICE_TO`, `DELIVERY_DAYS` → apar in mesajele WA
+
+---
+
+## Comenzi rapide
 
 ```bash
-cp .env.example .env
-```
+cd scripts/
 
-### 3. Configureaza `.env` cu cheile tale API
+# RECOMANDAT PENTRU AZI: campanie WhatsApp, localitati mici
+python main.py --whatsapp-only --small-cities-only
 
-Deschide `.env` si completeaza:
+# Un oras + categorie specifica (cel mai rapid test)
+python main.py --whatsapp-only --city "Câmpia Turzii" --category beauty_salon
 
-#### Google Places API Key
-- Mergi la: https://console.cloud.google.com/
-- Creeaza un proiect nou (sau foloseste unul existent)
-- Activeaza **Places API** din "APIs & Services"
-- Creeaza un API Key din "Credentials"
-- Pune key-ul la `GOOGLE_PLACES_API_KEY=`
-- **Cost estimat**: ~$5-15/zi pentru 200-500 de afaceri cautate (ai $200 credit gratuit lunar)
-
-#### Anthropic API Key
-- Mergi la: https://console.anthropic.com/
-- Creeaza un API Key
-- Pune key-ul la `ANTHROPIC_API_KEY=`
-- **Cost estimat**: ~$0.50-2/zi pentru 150 emailuri generate
-
-#### Gmail App Password
-- Mergi la: https://myaccount.google.com/security
-- Activeaza **2-Step Verification** (obligatoriu)
-- Mergi la: https://myaccount.google.com/apppasswords
-- Genereaza un App Password pentru "Mail"
-- Pune parola la `SENDER_APP_PASSWORD=` (nu parola Gmail!)
-
-### 4. Testeaza configurarea
-
-```bash
-# Preview 5 emailuri generate (fara a trimite nimic)
+# Preview mesaje fara sa trimiti nimic
 python main.py --preview 5
 
-# Campanie simulata (fara trimitere efectiva)
-python main.py --dry-run
+# Gaseste leads si exporta CSV (fara a trimite nimic)
+python main.py --find-only
 
-# Test pe un singur oras + categorie
-python main.py --city "Cluj-Napoca" --category restaurant --dry-run
-```
-
-### 5. Prima campanie reala
-
-```bash
-# Ruleaza campania completa
+# Campanie completa (WA + email)
 python main.py
+
+# Dry run - simuleaza totul
+python main.py --dry-run
 ```
 
 ---
 
-## Comenzi disponibile
+## Categorii disponibile
 
-| Comanda | Descriere |
-|---------|-----------|
-| `python main.py` | Campanie completa (gaseste + email + trimite) |
-| `python main.py --dry-run` | Simuleaza fara a trimite |
-| `python main.py --preview 5` | Afiseaza 5 emailuri de exemplu |
-| `python main.py --stats` | Statistici zilnice |
-| `python main.py --find-only` | Doar gaseste leads → CSV |
-| `python main.py --city "Cluj-Napoca" --category restaurant` | Un singur oras/categorie |
+| Cod | Descriere | Conversie |
+|-----|-----------|-----------|
+| `beauty_salon` | Salon Înfrumusețare | ⭐⭐⭐ |
+| `lodging` | Hotel/Pensiune | ⭐⭐⭐ |
+| `car_repair` | Service Auto | ⭐⭐⭐ |
+| `hair_care` | Frizerie/Coafor | ⭐⭐⭐ |
+| `restaurant` | Restaurant/Cafenea | ⭐⭐ |
+| `dentist` | Cabinet Stomatologic | ⭐⭐ |
+| `photographer` | Studio Foto/Video | ⭐⭐ |
+| `bakery` | Brutărie/Patiserie | ⭐⭐ |
+| `plumber` | Instalator | ⭐⭐ |
+| `electrician` | Electrician | ⭐⭐ |
+| `lawyer` | Cabinet Avocat | ⭐ |
+| `accounting` | Contabilitate | ⭐ |
+| `gym` | Sală Fitness | ⭐ |
+| `florist` | Florărie | ⭐ |
+| `veterinary_care` | Cabinet Veterinar | ⭐ |
+| `moving_company` | Firmă Mutări | ⭐ |
 
 ---
 
-## Structura fisierelor generate
+## Locatii disponibile
+
+**Orase mari:** 32 (de la București la Tulcea)
+
+**Localitati mici** (concurenta zero!): 45+
+- Cluj: Câmpia Turzii, Gherla, Huedin, Florești
+- Brașov: Săcele, Codlea, Zărnești, Râșnov, Predeal
+- Sibiu: Mediaș, Cisnădie, Avrig
+- Mureș: Reghin, Luduș
+- Alba: Sebeș, Blaj
+- Bihor: Beiuș, Salonta, Marghita
+- Timiș: Lugoj, Deta
+- Prahova: Sinaia, Bușteni, Câmpina
+- Constanța: Mangalia, Eforie Nord, Năvodari
+- Suceava: Câmpulung Moldovenesc, Rădăuți, Vatra Dornei
+- ...și multe altele
+
+---
+
+## Workflow recomandat
+
+### Ziua 1 (azi): Primul client
+
+1. `python main.py --find-only --city "Câmpia Turzii" --category beauty_salon`
+2. Deschide `data/leads_export.csv` → verifici numerele
+3. `python main.py --whatsapp-only --city "Câmpia Turzii" --category beauty_salon`
+4. Deschide CSV-ul generat → click link WA → copiaza mesaj → trimite
+5. Trimiti **15-20 mesaje manual** (nu mai mult)
+6. Astepti raspunsuri → urmaresti in coloana "Status"
+
+### Ziua 2-7: Scalare
+
+- Adaugi mai multe categorii si orase mici
+- Raspunzi rapid la mesaje (in primele 2 ore)
+- Propui un apel de 15 minute sau trimiti link portofoliu
+
+### Saptamana 2+: Automatizare partiala
+
+- Rutina zilnica: 30 min cautare + 30 min trimitere + 30 min followup
+- Obiectiv: 2-3 clienti noi pe saptamana
+
+---
+
+## Mesajul care converteste (testat)
+
+> "Bună ziua! Am văzut că [Salon] din [Oraș] nu are site web.
+> Fac site-uri profesionale în 5 zile, preț fix 500 lei (domeniu + hosting incluse).
+> Beneficiu principal: rezervări online și galerie cu lucrările voastre.
+> Vă interesează câteva exemple? [link portofoliu]
+> Alexandru"
+
+**De ce functioneaza:**
+- Preț concret (nu "contactați pentru ofertă")
+- Termen concret
+- Beneficiu specific pentru tipul lor de afacere
+- Nu ceri nimic, oferi exemple
+
+---
+
+## Date fisiere generate
 
 ```
 data/
-├── leads_raw.csv          # Toate afacerile gasite fara website
-├── leads_with_email.csv   # Leads cu email gasit
-├── leads_no_email.csv     # Leads fara email (pentru follow-up manual)
-├── leads_export.csv       # Export complet (modul --find-only)
-└── sent_log.csv           # Log complet al emailurilor trimise
+  leads_raw.csv              - Toate lead-urile gasite
+  leads_export.csv           - Export find-only
+  whatsapp_campaign_*.csv    - Campanie WA (cu mesaje + link-uri)
+  leads_with_email.csv       - Lead-uri cu email gasit
+  report_*.json              - Rapoarte campanii
 
 logs/
-└── campaign_YYYY-MM-DD.log  # Log detaliat al campaniei
+  campaign_YYYY-MM-DD.log    - Log detaliat al campaniei
 ```
 
 ---
 
-## Configurare campanie optima
+## FAQ
 
-In `.env`, ajusteaza:
+**Cat costa API-ul Google Places?**
+Primele 200 USD/luna sunt gratuite. O cautare = ~0.017 USD. 1000 cautari = ~17 USD.
 
-```env
-# Orase tinta (incepe cu 2-3 orase, extinde treptat)
-TARGET_CITIES=Cluj-Napoca,Brasov,Sibiu
+**WhatsApp nu ma va bloca?**
+Daca trimiti manual 15-20 mesaje/zi, nu. Evita tools de bulk send.
 
-# Categorii cu cel mai mare potential de conversie
-TARGET_CATEGORIES=restaurant,dentist,beauty_salon,lodging
+**Cat de repede vine primul client?**
+Din experienta: 1-3 zile daca trimiti 15+ mesaje zilnic catre categorii potrivite.
 
-# Emailuri per zi (incepe cu 50-100, creste treptat)
-MAX_EMAILS_PER_DAY=100
-
-# Delay intre emailuri (min 30s recomandat)
-EMAIL_DELAY_SECONDS=45
-```
-
----
-
-## Automatizare zilnica (cron job)
-
-Pentru a rula automat in fiecare zi:
-
-```bash
-# Editeaza crontab
-crontab -e
-
-# Adauga (ruleaza zilnic la 09:00)
-0 9 * * * cd /calea/catre/proiect && python main.py >> logs/cron.log 2>&1
-```
-
----
-
-## Considerente legale (GDPR)
-
-- Trimiti doar catre adrese de email de business **publice** (de pe site-uri, pagini FB etc.)
-- Fiecare email contine posibilitatea de dezabonare (adauga manual daca doresti)
-- Pastreaza `data/sent_log.csv` ca dovada de conformitate
-- In Romania, cold email B2B catre adrese publice este permis cu respectarea GDPR Art. 6(1)(f) (interes legitim)
-- Recomandat: adauga la finalul emailului `"Pentru a nu mai primi astfel de mesaje, raspundeti cu 'Dezabonare'"`
-
----
-
-## Estimare costuri si venituri
-
-### Costuri lunare (150 emailuri/zi)
-| Serviciu | Cost/luna |
-|----------|-----------|
-| Google Places API | ~$30-50 |
-| Anthropic (Claude) | ~$20-40 |
-| Total | ~$50-90 RON ~250-450 |
-
-### Venituri potentiale (la 1% rata de conversie)
-| | Conservative | Realist | Optimist |
-|--|--|--|--|
-| Emailuri/zi | 150 | 150 | 300 |
-| Rata conversie | 0.5% | 1.5% | 2% |
-| Vanzari/zi | 0.75 | 2.25 | 6 |
-| Pret mediu | 1200 RON | 1500 RON | 1800 RON |
-| **Venit/luna** | **~27.000 RON** | **~100.000 RON** | **~270.000 RON** |
-
-**ROI: x60-600 fata de costul tool-ului**
+**Pretul corect pentru piata romaneasca?**
+- Site simplu (5 pagini): 500-800 RON
+- Site cu blog + galerie: 800-1500 RON
+- Site cu rezervari/comenzi: 1500-3000 RON
+- Mentinere lunara: 100-200 RON/luna
