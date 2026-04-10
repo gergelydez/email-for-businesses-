@@ -6,15 +6,10 @@ const LEADS_KEY    = 'biz_leads'
 const SETTINGS_KEY = 'biz_settings'
 const STATS_KEY    = 'biz_stats'
 
-// ── Leads ────────────────────────────────────────────────────────────────────
-
 export function getLeads(): Business[] {
   if (typeof window === 'undefined') return []
-  try {
-    return JSON.parse(localStorage.getItem(LEADS_KEY) || '[]')
-  } catch {
-    return []
-  }
+  try { return JSON.parse(localStorage.getItem(LEADS_KEY) || '[]') }
+  catch { return [] }
 }
 
 export function saveLeads(leads: Business[]): void {
@@ -48,8 +43,6 @@ export function clearLeads(): void {
   localStorage.removeItem(LEADS_KEY)
 }
 
-// ── Settings ─────────────────────────────────────────────────────────────────
-
 export const DEFAULT_SETTINGS: Settings = {
   googlePlacesApiKey: '',
   anthropicApiKey:    '',
@@ -58,6 +51,10 @@ export const DEFAULT_SETTINGS: Settings = {
   senderName:         '',
   yourWebsite:        '',
   yourPortfolio:      '',
+  yourPhone:          '',
+  priceFrom:          '500',
+  priceTo:            '1500',
+  deliveryDays:       '5',
   maxEmailsPerDay:    150,
 }
 
@@ -66,9 +63,7 @@ export function getSettings(): Settings {
   try {
     const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
     return { ...DEFAULT_SETTINGS, ...stored }
-  } catch {
-    return DEFAULT_SETTINGS
-  }
+  } catch { return DEFAULT_SETTINGS }
 }
 
 export function saveSettings(settings: Settings): void {
@@ -76,17 +71,13 @@ export function saveSettings(settings: Settings): void {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
 }
 
-// ── Daily stats ───────────────────────────────────────────────────────────────
-
 export function getTodayStats(): DailyStats {
   if (typeof window === 'undefined') return { date: '', sent: 0, failed: 0 }
   const today = new Date().toISOString().split('T')[0]
   try {
     const all: DailyStats[] = JSON.parse(localStorage.getItem(STATS_KEY) || '[]')
     return all.find(s => s.date === today) || { date: today, sent: 0, failed: 0 }
-  } catch {
-    return { date: today, sent: 0, failed: 0 }
-  }
+  } catch { return { date: today, sent: 0, failed: 0 } }
 }
 
 export function incrementTodaySent(success: boolean): void {
@@ -95,21 +86,14 @@ export function incrementTodaySent(success: boolean): void {
   try {
     const all: DailyStats[] = JSON.parse(localStorage.getItem(STATS_KEY) || '[]')
     const idx = all.findIndex(s => s.date === today)
-    if (idx !== -1) {
-      if (success) all[idx].sent++
-      else all[idx].failed++
-    } else {
-      all.push({ date: today, sent: success ? 1 : 0, failed: success ? 0 : 1 })
-    }
+    if (idx !== -1) { if (success) all[idx].sent++; else all[idx].failed++ }
+    else all.push({ date: today, sent: success ? 1 : 0, failed: success ? 0 : 1 })
     localStorage.setItem(STATS_KEY, JSON.stringify(all))
   } catch {}
 }
 
 export function getAllStats(): DailyStats[] {
   if (typeof window === 'undefined') return []
-  try {
-    return JSON.parse(localStorage.getItem(STATS_KEY) || '[]')
-  } catch {
-    return []
-  }
+  try { return JSON.parse(localStorage.getItem(STATS_KEY) || '[]') }
+  catch { return [] }
 }

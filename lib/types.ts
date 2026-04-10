@@ -3,15 +3,20 @@ export interface Business {
   name: string
   address: string
   phone: string
+  phone_intl: string
+  whatsapp_link: string
   rating: number
   reviews_count: number
   category: string
   category_label: string
   city: string
+  is_small_city: boolean
   contact_email: string
   generated_subject: string
   generated_body: string
+  generated_whatsapp: string
   status: 'found' | 'ready' | 'sent' | 'failed'
+  contact_method: 'whatsapp' | 'email' | 'none'
   sent_at?: string
   error?: string
   created_at: string
@@ -25,6 +30,10 @@ export interface Settings {
   senderName: string
   yourWebsite: string
   yourPortfolio: string
+  yourPhone: string
+  priceFrom: string
+  priceTo: string
+  deliveryDays: string
   maxEmailsPerDay: number
 }
 
