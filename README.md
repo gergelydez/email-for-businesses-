@@ -1,0 +1,94 @@
+# 🎯 Outreach Pro – Găsește clienți fără site web
+
+Aplicație Next.js care găsește automat afaceri din România fără website, generează mesaje personalizate cu Claude AI și trimite oferte pe **WhatsApp** sau Email.
+
+## ✨ Funcționalități
+
+- 🔍 **Căutare automată** pe Google Places – afaceri fără site din orice oraș/județ
+- 📱 **Trimitere WhatsApp** cu un singur click – mesajul se copiază automat
+- 🤖 **AI Personalizare** – Claude generează mesaje unice per afacere
+- 🗺️ **60+ orașe** + căutare pe județ
+- ⚡ **Generare în masă** – procesează toate leads-urile automat
+- 💾 **Salvare locală** – leads și setări persistente
+
+## 🚀 Deploy rapid pe Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+
+1. Fork acest repo pe GitHub
+2. Importă în Vercel
+3. Adaugă variabilele de mediu (vezi mai jos)
+4. Deploy!
+
+## ⚙️ Variabile de mediu
+
+Copiază `.env.example` în `.env.local` și completează:
+
+```bash
+cp .env.example .env.local
+```
+
+| Variabilă | Descriere | Unde o obții |
+|-----------|-----------|--------------|
+| `GOOGLE_PLACES_API_KEY` | Google Places API | [console.cloud.google.com](https://console.cloud.google.com) |
+| `ANTHROPIC_API_KEY` | Claude AI | [console.anthropic.com](https://console.anthropic.com) |
+| `SENDER_EMAIL` | Gmail pentru outreach | Contul tău Gmail |
+| `SENDER_APP_PASSWORD` | Gmail App Password | myaccount.google.com → Security |
+| `SENDER_NAME` | Numele tău | - |
+| `YOUR_WEBSITE` | Site-ul tău | - |
+| `YOUR_PORTFOLIO_URL` | Portofoliu lucrări | - |
+| `YOUR_PHONE` | Telefon contact | - |
+| `PRICE_FROM` | Preț minim RON | Default: 500 |
+| `PRICE_TO` | Preț maxim RON | Default: 1500 |
+| `DELIVERY_DAYS` | Zile livrare | Default: 5 |
+
+> **Notă:** Cheile API pot fi configurate și direct din aplicație (Setări), fără `.env`.
+
+## 💻 Rulare locală
+
+```bash
+npm install
+npm run dev
+```
+
+Deschide [http://localhost:3000](http://localhost:3000)
+
+## 📁 Structură proiect
+
+```
+outreach-pro/
+├── app/
+│   ├── page.tsx                    # Dashboard
+│   ├── leads/page.tsx              # Pagina principală
+│   ├── settings/page.tsx           # Setări
+│   └── api/
+│       ├── find-businesses/        # Google Places search
+│       ├── generate-message/       # Claude AI mesaje
+│       └── send-email/             # Trimitere email Gmail
+├── lib/
+│   ├── constants.ts                # Orașe, județe, categorii
+│   ├── storage.ts                  # localStorage helpers
+│   └── types.ts                    # TypeScript types
+└── .env.example
+```
+
+## 💰 Strategie pentru clienți rapizi
+
+**Categorii cu conversie maximă:**
+- 💄 Salon de Înfrumusețare – proprietarele răspund repede pe WA
+- 🥐 Brutărie/Patiserie – sezon Paști, comenzi online urgente
+- 🏨 Hotel/Pensiune – sezon turistic activ
+- 📸 Studio Foto – sezon nunți
+
+**De ce orașe mici?**
+- Zero concurență online
+- Proprietarul e și el la telefon
+- Nu știe cât costă un site → prețul tău e referința
+
+**Statistici reale:**
+- 30 mesaje/zi → 3-5 clienți interesați/săptămână
+- 500-1500 RON/site = 1000-3000 RON/săptămână
+
+## 📄 Licență
+
+MIT

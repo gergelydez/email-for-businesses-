@@ -1,7 +1,6 @@
 {
-  "functions": {
-    "app/api/find-businesses/route.ts": { "maxDuration": 60 },
-    "app/api/generate-email/route.ts": { "maxDuration": 30 },
-    "app/api/send-email/route.ts":     { "maxDuration": 30 }
-  }
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install"
 }

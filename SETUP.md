@@ -1,185 +1,138 @@
-# Business Outreach Automator v2.0 🇷🇴
+# 🚀 Outreach Pro v2.0 – Setup complet
 
-Gaseste afaceri din Romania fara website si trimite-le oferte personalizate prin **WhatsApp** sau Email.
+## Ce face această aplicație
 
----
-
-## De ce WhatsApp (nu Email)?
-
-| | WhatsApp | Email |
-|---|---|---|
-| Rata deschidere | **98%** | 20% |
-| Email disponibil in Google Places | 5% | - |
-| Parere ca spam | Rara | Frecventa |
-| Raspuns in aceeasi zi | **DA** | Rar |
-
-**Concluzie:** Email-ul lipseste din aproape toate listingurile Google. WhatsApp e calea directa.
+Găsește automat afaceri din România care **nu au website** pe Google Maps, generează mesaje personalizate cu Claude AI și îți permite să trimiți oferte pe **WhatsApp** (un click) sau Email.
 
 ---
 
-## Instalare (5 minute)
+## Setup în 10 minute
+
+### 1. Instalare dependențe
 
 ```bash
-cd scripts/
-pip install -r requirements.txt
-cp ../.env.example ../.env
-# Editeaza .env cu datele tale
+npm install
 ```
 
----
+### 2. Configurare chei API
 
-## Configurare .env
-
-**Obligatoriu:**
-- `GOOGLE_PLACES_API_KEY` → https://console.cloud.google.com/ (activeaza Places API)
-- `ANTHROPIC_API_KEY` → https://console.anthropic.com/
-- `SENDER_NAME`, `YOUR_PHONE`, `YOUR_WEBSITE`, `YOUR_PORTFOLIO_URL`
-
-**Setari campanie:**
-- `TARGET_CITIES` → orase mari tinta
-- `TARGET_SMALL_CITIES` → lasa gol = se adauga automat localitati mici din jur
-- `TARGET_CATEGORIES` → tipuri de afaceri (vezi lista mai jos)
-- `PRICE_FROM`, `PRICE_TO`, `DELIVERY_DAYS` → apar in mesajele WA
-
----
-
-## Comenzi rapide
+Copiază `.env.example` în `.env.local`:
 
 ```bash
-cd scripts/
+cp .env.example .env.local
+```
 
-# RECOMANDAT PENTRU AZI: campanie WhatsApp, localitati mici
-python main.py --whatsapp-only --small-cities-only
+Completează cheile în `.env.local` (sau le poți pune direct în app la Setări):
 
-# Un oras + categorie specifica (cel mai rapid test)
-python main.py --whatsapp-only --city "Câmpia Turzii" --category beauty_salon
+#### Google Places API Key
+1. Mergi pe [console.cloud.google.com](https://console.cloud.google.com)
+2. Creează un proiect nou
+3. Activează **Places API**
+4. Generează o cheie API
+5. ⚠️ Costă ~$17 per 1000 cereri de detalii. Pentru 100 leads = ~$2.
 
-# Preview mesaje fara sa trimiti nimic
-python main.py --preview 5
+#### Anthropic API Key
+1. Mergi pe [console.anthropic.com](https://console.anthropic.com)
+2. API Keys → Create Key
+3. ~$0.003 per mesaj generat (practic gratuit)
 
-# Gaseste leads si exporta CSV (fara a trimite nimic)
-python main.py --find-only
+#### Gmail App Password (pentru trimitere email)
+1. Activează 2FA pe contul Gmail
+2. Mergi pe [myaccount.google.com](https://myaccount.google.com) → Security → App passwords
+3. Creează o parolă pentru "Mail"
+4. Folosește acea parolă (nu parola normală!)
 
-# Campanie completa (WA + email)
-python main.py
+### 3. Pornire aplicație
 
-# Dry run - simuleaza totul
-python main.py --dry-run
+```bash
+npm run dev
+```
+
+Deschide [http://localhost:3000](http://localhost:3000)
+
+### 4. Prima campanie
+
+1. **Setări** → completează toate câmpurile
+2. **Leads** → selectează un județ sau oraș + categorie
+3. Apasă **Caută afaceri fără site**
+4. Apasă **⚡ Generează toate** pentru mesaje în masă
+5. Click pe orice lead → **📱 Trimite WhatsApp**
+
+---
+
+## Strategia pentru a face bani AZI
+
+### Categorii cu conversie maximă (în ordine)
+1. **Salon de Înfrumusețare** – proprietarele răspund repede pe WhatsApp
+2. **Brutărie/Patiserie** – acum e sezon Paști, vor comenzi online
+3. **Hotel/Pensiune** – sezon turistic = urgență
+4. **Frizerie/Coafor** – similar saloane
+5. **Studio Foto/Video** – sezon nunți, înțeleg valoarea portofoliului
+
+### Orașe mici = GOLDMINE (marcate cu 🏘️)
+- Zero concurență online
+- Proprietarul e și recepționerul și marketingul
+- Răspunde în 30 minute pe WhatsApp
+- Nu știe cât costă un site → prețul tău e cel de referință
+
+### Mesajul WhatsApp care convertește
+Generatorul AI aplică automat:
+- Menționează recenziile lor Google (credibilitate că le-ai văzut)
+- Beneficiu specific categoriei lor (nu generic)
+- Preț fix (oamenii cumpără când știu exact costul)
+- O singură întrebare la final (nu CTA agresiv)
+- Max 5 rânduri (ecran de telefon!)
+
+### Statistici realiste
+- 30 mesaje trimise/zi → 8-10 deschid conversația
+- 3-5 cer detalii → 1-2 devin clienți/săptămână
+- 500-1500 RON/site = **1000-3000 RON/săptămână**
+
+---
+
+## Structura proiectului
+
+```
+outreach-pro/
+├── app/
+│   ├── page.tsx                    # Dashboard principal
+│   ├── leads/page.tsx              # Pagina principală – căutare + leads + trimitere
+│   ├── settings/page.tsx           # Configurare chei și profil
+│   ├── api/
+│   │   ├── find-businesses/        # Google Places API – caută afaceri fără site
+│   │   ├── generate-message/       # Claude AI – generează WhatsApp + Email
+│   │   └── send-email/             # Nodemailer – trimite email Gmail
+│   └── globals.css
+├── lib/
+│   ├── constants.ts                # Orașe, județe, categorii, pain points
+│   ├── storage.ts                  # localStorage helpers
+│   └── types.ts                    # TypeScript interfaces
+└── .env.example
 ```
 
 ---
 
-## Categorii disponibile
+## Deploy pe Vercel (gratuit)
 
-| Cod | Descriere | Conversie |
-|-----|-----------|-----------|
-| `beauty_salon` | Salon Înfrumusețare | ⭐⭐⭐ |
-| `lodging` | Hotel/Pensiune | ⭐⭐⭐ |
-| `car_repair` | Service Auto | ⭐⭐⭐ |
-| `hair_care` | Frizerie/Coafor | ⭐⭐⭐ |
-| `restaurant` | Restaurant/Cafenea | ⭐⭐ |
-| `dentist` | Cabinet Stomatologic | ⭐⭐ |
-| `photographer` | Studio Foto/Video | ⭐⭐ |
-| `bakery` | Brutărie/Patiserie | ⭐⭐ |
-| `plumber` | Instalator | ⭐⭐ |
-| `electrician` | Electrician | ⭐⭐ |
-| `lawyer` | Cabinet Avocat | ⭐ |
-| `accounting` | Contabilitate | ⭐ |
-| `gym` | Sală Fitness | ⭐ |
-| `florist` | Florărie | ⭐ |
-| `veterinary_care` | Cabinet Veterinar | ⭐ |
-| `moving_company` | Firmă Mutări | ⭐ |
-
----
-
-## Locatii disponibile
-
-**Orase mari:** 32 (de la București la Tulcea)
-
-**Localitati mici** (concurenta zero!): 45+
-- Cluj: Câmpia Turzii, Gherla, Huedin, Florești
-- Brașov: Săcele, Codlea, Zărnești, Râșnov, Predeal
-- Sibiu: Mediaș, Cisnădie, Avrig
-- Mureș: Reghin, Luduș
-- Alba: Sebeș, Blaj
-- Bihor: Beiuș, Salonta, Marghita
-- Timiș: Lugoj, Deta
-- Prahova: Sinaia, Bușteni, Câmpina
-- Constanța: Mangalia, Eforie Nord, Năvodari
-- Suceava: Câmpulung Moldovenesc, Rădăuți, Vatra Dornei
-- ...și multe altele
-
----
-
-## Workflow recomandat
-
-### Ziua 1 (azi): Primul client
-
-1. `python main.py --find-only --city "Câmpia Turzii" --category beauty_salon`
-2. Deschide `data/leads_export.csv` → verifici numerele
-3. `python main.py --whatsapp-only --city "Câmpia Turzii" --category beauty_salon`
-4. Deschide CSV-ul generat → click link WA → copiaza mesaj → trimite
-5. Trimiti **15-20 mesaje manual** (nu mai mult)
-6. Astepti raspunsuri → urmaresti in coloana "Status"
-
-### Ziua 2-7: Scalare
-
-- Adaugi mai multe categorii si orase mici
-- Raspunzi rapid la mesaje (in primele 2 ore)
-- Propui un apel de 15 minute sau trimiti link portofoliu
-
-### Saptamana 2+: Automatizare partiala
-
-- Rutina zilnica: 30 min cautare + 30 min trimitere + 30 min followup
-- Obiectiv: 2-3 clienti noi pe saptamana
-
----
-
-## Mesajul care converteste (testat)
-
-> "Bună ziua! Am văzut că [Salon] din [Oraș] nu are site web.
-> Fac site-uri profesionale în 5 zile, preț fix 500 lei (domeniu + hosting incluse).
-> Beneficiu principal: rezervări online și galerie cu lucrările voastre.
-> Vă interesează câteva exemple? [link portofoliu]
-> Alexandru"
-
-**De ce functioneaza:**
-- Preț concret (nu "contactați pentru ofertă")
-- Termen concret
-- Beneficiu specific pentru tipul lor de afacere
-- Nu ceri nimic, oferi exemple
-
----
-
-## Date fisiere generate
-
-```
-data/
-  leads_raw.csv              - Toate lead-urile gasite
-  leads_export.csv           - Export find-only
-  whatsapp_campaign_*.csv    - Campanie WA (cu mesaje + link-uri)
-  leads_with_email.csv       - Lead-uri cu email gasit
-  report_*.json              - Rapoarte campanii
-
-logs/
-  campaign_YYYY-MM-DD.log    - Log detaliat al campaniei
+```bash
+npm install -g vercel
+vercel
 ```
 
+Adaugă variabilele de mediu în dashboard-ul Vercel.
+
 ---
 
-## FAQ
+## Troubleshooting
 
-**Cat costa API-ul Google Places?**
-Primele 200 USD/luna sunt gratuite. O cautare = ~0.017 USD. 1000 cautari = ~17 USD.
+**"Google API error: REQUEST_DENIED"**
+→ Activează Places API în Google Cloud Console și verifică că cheia nu are restricții de domeniu
 
-**WhatsApp nu ma va bloca?**
-Daca trimiti manual 15-20 mesaje/zi, nu. Evita tools de bulk send.
+**"Lipsă Anthropic API key"**
+→ Setează cheia în Setări sau în `.env.local`
 
-**Cat de repede vine primul client?**
-Din experienta: 1-3 zile daca trimiti 15+ mesaje zilnic catre categorii potrivite.
+**"Nodemailer: Invalid login"**
+→ Folosește App Password, nu parola normală Gmail. Activează 2FA primul.
 
-**Pretul corect pentru piata romaneasca?**
-- Site simplu (5 pagini): 500-800 RON
-- Site cu blog + galerie: 800-1500 RON
-- Site cu rezervari/comenzi: 1500-3000 RON
-- Mentinere lunara: 100-200 RON/luna
+**WhatsApp nu se deschide**
+→ Verifică că WhatsApp Web e autentificat în browser, sau folosește telefonul
