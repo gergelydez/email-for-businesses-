@@ -492,7 +492,7 @@ function LeadCard({ biz, settings, onUpdate, onDelete }:
         )}
 
         <button onClick={()=>setOpen(true)}
-          style={{ width:'100%', padding:'10px 16px', borderRadius:11, border:'none', cursor:'pointer', fontWeight:700, fontSize:13, color:'#fff', transition:'transform .12s',
+          style={{ width:'100%', padding:'10px 16px', borderRadius:11, cursor:'pointer', fontWeight:700, fontSize:13, transition:'transform .12s',
             background: biz.conversation_stage==='closed_won' ? 'linear-gradient(135deg,#4ade80,#16a34a)'
               : biz.conversation_stage==='replied'||biz.conversation_stage==='negotiating' ? 'linear-gradient(135deg,#f6ad55,#ed8936)'
               : biz.whatsapp_link ? 'linear-gradient(135deg,rgba(37,211,102,0.2),rgba(18,140,126,0.2))'
@@ -719,7 +719,7 @@ export default function LeadsPage() {
                 </div>
               )}
               <button onClick={generateAllMessages} disabled={genProgress!==null}
-                style={{ width:'100%', padding:'10px', border:'none', borderRadius:10, cursor:'pointer', background:'rgba(37,211,102,0.15)', border:'1px solid rgba(37,211,102,0.3)', color:'#25D366', fontWeight:700, fontSize:13, opacity:genProgress?0.6:1 }}>
+                style={{ width:'100%', padding:'10px', borderRadius:10, cursor:'pointer', background:'rgba(37,211,102,0.15)', border:'1px solid rgba(37,211,102,0.3)', color:'#25D366', fontWeight:700, fontSize:13, opacity:genProgress?0.6:1 }}>
                 {genProgress?`⏳ ${genProgress.done}/${genProgress.total}...`:`⚡ Generează toate (${notGenerated})`}
               </button>
             </div>
@@ -739,7 +739,7 @@ export default function LeadsPage() {
                 {k:'won',   l:`✅ Câștigați (${counts.won})`},
               ] as {k:string,l:string,hot?:boolean}[]).map(f=>(
                 <button key={f.k} onClick={()=>setFilter(f.k as typeof filter)}
-                  style={{ padding:'6px 12px', borderRadius:20, border:'none', fontWeight:700, fontSize:12, cursor:'pointer', whiteSpace:'nowrap',
+                  style={{ padding:'6px 12px', borderRadius:20, fontWeight:700, fontSize:12, cursor:'pointer', whiteSpace:'nowrap',
                     background: filter===f.k ? (f.hot?'rgba(246,173,85,0.25)':'rgba(99,179,237,0.2)') : 'rgba(255,255,255,0.04)',
                     color: filter===f.k ? (f.hot?'#f6ad55':'#63b3ed') : '#475569',
                     boxShadow: f.hot&&filter!==f.k ? '0 0 10px rgba(246,173,85,0.2)' : 'none',
@@ -782,3 +782,4 @@ export default function LeadsPage() {
     </div>
   )
 }
+
