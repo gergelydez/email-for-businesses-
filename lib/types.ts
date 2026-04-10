@@ -15,9 +15,15 @@ export interface Business {
   generated_subject: string
   generated_body: string
   generated_whatsapp: string
+  generated_demo_html: string
+  demo_status: 'none' | 'generating' | 'ready'
+  conversation_stage: 'new' | 'sent_opening' | 'replied' | 'demo_sent' | 'negotiating' | 'closed_won' | 'closed_lost'
+  reply_text: string
+  notes: string
   status: 'found' | 'ready' | 'sent' | 'failed'
   contact_method: 'whatsapp' | 'email' | 'none'
   sent_at?: string
+  replied_at?: string
   error?: string
   created_at: string
 }
