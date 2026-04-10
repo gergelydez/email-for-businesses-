@@ -13,12 +13,22 @@ interface PlaceDetails {
     name?: string
     formatted_address?: string
     formatted_phone_number?: string
+    international_phone_number?: string
     website?: string
-    email?: string
     rating?: number
     user_ratings_total?: number
     business_status?: string
   }
+}
+
+function normalizePhoneForWhatsApp(phone: string): string {
+  if (!phone) return ''
+  const digits = phone.replace(/\D/g, '')
+  if (digits.startsWith('0') && digits.length === 10) {
+    return '40' + digits.slice(1)
+  }
+  if (digits.startsWith('40')) return digits
+  return digits
 }
 
 export async function POST(req: NextRequest) {
@@ -35,7 +45,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Oraș necunoscut: ${city}` }, { status: 400 })
   }
 
-  // Step 1 – Nearby Search
   const nearbyUrl = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json')
   nearbyUrl.searchParams.set('location', `${coords.lat},${coords.lng}`)
   nearbyUrl.searchParams.set('radius', String(coords.radius))
@@ -54,18 +63,16 @@ export async function POST(req: NextRequest) {
 
   const places: PlaceResult[] = nearbyData.results || []
 
-  // Step 2 – Details in parallel (no timeout between calls)
   const detailsResults: PlaceDetails[] = await Promise.all(
     places.map(async (place) => {
       const detailUrl = new URL('https://maps.googleapis.com/maps/api/place/details/json')
       detailUrl.searchParams.set('place_id', place.place_id)
       detailUrl.searchParams.set(
         'fields',
-        'name,formatted_address,formatted_phone_number,website,rating,user_ratings_total,business_status',
+        'name,formatted_address,formatted_phone_number,international_phone_number,website,rating,user_ratings_total,business_status',
       )
       detailUrl.searchParams.set('key', apiKey)
       detailUrl.searchParams.set('language', 'ro')
-
       try {
         const res = await fetch(detailUrl.toString())
         return res.json()
@@ -75,7 +82,6 @@ export async function POST(req: NextRequest) {
     }),
   )
 
-  // Step 3 – Filter: no website, has phone, is open
   const businesses = detailsResults
     .map((d, i) => ({ d, place: places[i] }))
     .filter(({ d }) => {
@@ -83,26 +89,34 @@ export async function POST(req: NextRequest) {
       return (
         r.business_status !== 'CLOSED_PERMANENTLY' &&
         !r.website &&
-        r.formatted_phone_number
+        (r.formatted_phone_number || r.international_phone_number)
       )
     })
     .map(({ d, place }) => {
       const r = d.result || {}
+      const phone = r.formatted_phone_number || ''
+      const intlPhone = r.international_phone_number || ''
+      const waNumber = normalizePhoneForWhatsApp(intlPhone || phone)
       return {
-        place_id:       place.place_id,
-        name:           r.name || place.name,
-        address:        r.formatted_address || '',
-        phone:          r.formatted_phone_number || '',
-        rating:         r.rating || 0,
-        reviews_count:  r.user_ratings_total || 0,
+        place_id:            place.place_id,
+        name:                r.name || place.name,
+        address:             r.formatted_address || '',
+        phone,
+        phone_intl:          waNumber,
+        whatsapp_link:       waNumber ? `https://wa.me/${waNumber}` : '',
+        rating:              r.rating || 0,
+        reviews_count:       r.user_ratings_total || 0,
         category,
-        category_label: BUSINESS_CATEGORIES[category] || category,
+        category_label:      BUSINESS_CATEGORIES[category] || category,
         city,
-        contact_email:      '',
-        generated_subject:  '',
-        generated_body:     '',
-        status:         'found',
-        created_at:     new Date().toISOString(),
+        is_small_city:       coords.isSmall || false,
+        contact_email:       '',
+        generated_subject:   '',
+        generated_body:      '',
+        generated_whatsapp:  '',
+        status:              'found',
+        contact_method:      waNumber ? 'whatsapp' : 'none',
+        created_at:          new Date().toISOString(),
       }
     })
 
