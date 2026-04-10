@@ -113,19 +113,73 @@ function ConversationModal({ biz, settings, onClose, onUpdate }:
     if (!settings.anthropicApiKey) { setErr('Adaugă Anthropic API key în Setări ⚙️'); return }
     setDemoLoading(true); setErr('')
     onUpdate(biz.place_id, { demo_status:'generating' })
+
+    const cityClean = biz.city.replace(' 🏘️','')
+    const hasRating = biz.rating >= 4.2 && biz.reviews_count >= 10
+    const pFrom = settings.priceFrom || '500'
+    const days  = settings.deliveryDays || '5'
+    const sName = settings.senderName || 'Alexandru'
+    const sPhone = settings.yourPhone || ''
+
+    const COLOR_MAP: Record<string,string> = {
+      beauty_salon:'#9d4edd', hair_care:'#9d4edd', lodging:'#2d6a4f',
+      restaurant:'#d62828', bakery:'#c9a227', dentist:'#0077b6',
+      doctor:'#0077b6', car_repair:'#1b4332', photographer:'#1d3557',
+      gym:'#7209b7', florist:'#e63946', lawyer:'#1d3557',
+      accounting:'#1d4ed8', veterinary_care:'#386641',
+    }
+    const color = COLOR_MAP[biz.category] || '#1d4ed8'
+    const domainSlug = biz.name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
+    const waLink = biz.phone_intl ? `https://wa.me/${biz.phone_intl}` : ''
+    const telLink = biz.phone ? `tel:${biz.phone.replace(/\s/g,'')}` : '#'
+    const year = new Date().getFullYear()
+
+    const prompt = `Generează un site web demo COMPLET în HTML/CSS pentru această afacere.
+
+Afacere: ${biz.name} | Tip: ${biz.category_label} | Oraș: ${cityClean}
+Telefon: ${biz.phone || 'nedisponibil'} | ${hasRating ? `Rating: ${biz.rating}★ (${biz.reviews_count} recenzii)` : ''}
+Culoare: ${color} | Domeniu: ${domainSlug}.ro
+
+STRUCTURA (toate secțiunile obligatorii):
+1. Banner sticky (${color}): "✨ DEMO · Site în ${days} zile de la ${pFrom} RON · ${sName}${sPhone ? ' · '+sPhone : ''}"
+2. Navbar alb: logo "${biz.name}" + buton telefon href="${telLink}"
+3. Hero gradient ${color}: titlu, subtitlu, 2 butoane CTA
+4. Servicii: 6 carduri cu emoji relevante pentru ${biz.category_label}
+5. Despre noi: 2 paragrafe specifice domeniului
+6. Galerie: 4 placeholder-uri (div gri + emoji + text)
+7. ${hasRating ? `Recenzii: ${biz.rating}★ din ${biz.reviews_count} Google + 2 recenzii fictive` : '3 recenzii fictive pozitive'}
+8. Contact: box ${color}, <a href="${telLink}">${biz.phone||''}</a>${waLink ? `, <a href="${waLink}">WhatsApp</a>` : ''}, adresă
+9. Footer: ${domainSlug}.ro · © ${year} · "Site de ${sName}${sPhone?' · '+sPhone:''} · de la ${pFrom} RON · ${days} zile"
+
+CSS: mobile responsive, animație fade-in, fără dependențe externe.
+Returnează DOAR HTML complet începând cu <!DOCTYPE html>`
+
     try {
-      const res = await fetch('/api/generate-message', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ business:biz, mode:'demo', ...apiBase }),
+      // Rută separată cu maxDuration=300 și streaming — fără timeout Vercel
+      const res = await fetch('/api/generate-demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          business: biz,
+          anthropicApiKey: settings.anthropicApiKey,
+          senderName: settings.senderName,
+          yourPhone: settings.yourPhone,
+          priceFrom: settings.priceFrom,
+          deliveryDays: settings.deliveryDays,
+        }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error||'Eroare generare demo')
-      if (data.demo_html) {
-        setDemoHtml(data.demo_html)
-        onUpdate(biz.place_id, { generated_demo_html:data.demo_html, demo_status:'ready' })
-      }
-    } catch(e:unknown) { setErr(e instanceof Error ? e.message : String(e)); onUpdate(biz.place_id,{demo_status:'none'}) }
-    finally { setDemoLoading(false) }
+      if (!res.ok) throw new Error(data.error || 'Eroare generare demo')
+      const finalHtml = data.demo_html || ''
+      if (!finalHtml) throw new Error('Demo gol returnat')
+      setDemoHtml(finalHtml)
+      onUpdate(biz.place_id, { generated_demo_html: finalHtml, demo_status: 'ready' })
+    } catch(e:unknown) {
+      setErr(e instanceof Error ? e.message : String(e))
+      onUpdate(biz.place_id, { demo_status: 'none' })
+    } finally {
+      setDemoLoading(false)
+    }
   }
 
   async function copyText(text: string, key: string) {
@@ -782,4 +836,3 @@ export default function LeadsPage() {
     </div>
   )
 }
-
