@@ -882,6 +882,11 @@ export default function LeadsPage() {
   const [searchError, setSearchError] = useState('')
   const [filter, setFilter]     = useState<'all'|'hot'|'found'|'sent'|'replied'|'demo'|'won'>('all')
   const [genProgress, setGenProgress] = useState<{done:number,total:number}|null>(null)
+  const [marketData, setMarketData] = useState<{
+    totalFound:number; withWebsite:number; withoutWebsite:number;
+    saturationPct:number; opportunityPct:number;
+    verdict:{ label:string; emoji:string; color:string; msg:string }
+  }|null>(null)
 
   useEffect(() => {
     const raw = getLeads()
@@ -936,14 +941,14 @@ export default function LeadsPage() {
   }
   function handleDelete(id: string) { deleteLead(id); setLeads(getLeads()) }
 
-  async function searchCityCategory(c: string, cat: string): Promise<Business[]> {
+  async function searchCityCategory(c: string, cat: string): Promise<{businesses:Business[], market:typeof marketData}> {
     const res = await fetch('/api/find-businesses', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ city:c, category:cat, googleApiKey:settings.googlePlacesApiKey }),
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error||'Eroare API')
-    return (data.businesses||[]).map((b: Business) => ({
+    const businesses = (data.businesses||[]).map((b: Business) => ({
       ...b,
       generated_demo_html: '',
       demo_status: 'none',
@@ -951,16 +956,39 @@ export default function LeadsPage() {
       reply_text: '',
       notes: '',
     }))
+    return { businesses, market: data.market || null }
   }
 
   async function handleSearch() {
     if (!settings.googlePlacesApiKey) { setSearchError('Configurează Google Places API key în Setări ⚙️'); return }
-    setSearching(true); setSearchError('')
+    setSearching(true); setSearchError(''); setMarketData(null)
     try {
       let all: Business[] = []
+      let aggMarket = { totalFound:0, withWebsite:0, withoutWebsite:0, saturationPct:0, opportunityPct:0, verdict: {label:'',emoji:'',color:'',msg:''} }
       const cities = searchMode==='judet'&&judet ? JUDETE[judet]||[] : [city]
       for (const c of cities) {
-        try { const r = await searchCityCategory(c, category); all = [...all, ...r] } catch {}
+        try {
+          const { businesses, market } = await searchCityCategory(c, category)
+          all = [...all, ...businesses]
+          if (market) {
+            aggMarket.totalFound     += market.totalFound
+            aggMarket.withWebsite    += market.withWebsite
+            aggMarket.withoutWebsite += market.withoutWebsite
+          }
+        } catch {}
+      }
+      // Recalculează saturația agregată
+      if (aggMarket.totalFound > 0) {
+        aggMarket.saturationPct  = Math.round((aggMarket.withWebsite / aggMarket.totalFound) * 100)
+        aggMarket.opportunityPct = 100 - aggMarket.saturationPct
+        const sp = aggMarket.saturationPct
+        aggMarket.verdict =
+          sp<=20 ? {label:'Goldmine',emoji:'💎',color:'#4ade80',msg:`${aggMarket.opportunityPct}% fără site — concurență minimă, tu ești primul`}
+          :sp<=40 ? {label:'Excelent',emoji:'🔥',color:'#f97316',msg:`${aggMarket.opportunityPct}% fără site — piață activă cu mulți clienți potențiali`}
+          :sp<=60 ? {label:'Bun',     emoji:'⚡',color:'#eab308',msg:`${aggMarket.opportunityPct}% fără site — merită, există oportunitate`}
+          :sp<=80 ? {label:'Mediu',   emoji:'👍',color:'#64748b',msg:`Doar ${aggMarket.opportunityPct}% fără site — piață parțial saturată`}
+          :         {label:'Saturat', emoji:'❄️',color:'#ef4444',msg:`Doar ${aggMarket.opportunityPct}% fără site — schimbă categoria sau orașul`}
+        setMarketData(aggMarket)
       }
       const updated = addLeads(all)
       setLeads(updated)
@@ -1075,6 +1103,57 @@ export default function LeadsPage() {
               {searching?'⏳ Caut...':'🔍 Caută afaceri fără site'}
             </button>
           </div>
+
+          {/* Market Intel — apare după search */}
+          {marketData && (
+            <div style={{ background:'rgba(13,22,41,0.95)', border:`1px solid ${marketData.verdict.color}40`, borderRadius:14, padding:16, marginBottom:12 }}>
+              <div style={{ fontWeight:700, color:'#f1f5f9', fontSize:13, marginBottom:12 }}>
+                📊 Market Intel
+              </div>
+              {/* Verdict principal */}
+              <div style={{ background:`${marketData.verdict.color}15`, border:`1px solid ${marketData.verdict.color}40`, borderRadius:10, padding:12, marginBottom:12, textAlign:'center' }}>
+                <div style={{ fontSize:28, marginBottom:4 }}>{marketData.verdict.emoji}</div>
+                <div style={{ fontSize:15, fontWeight:800, color:marketData.verdict.color, marginBottom:4 }}>{marketData.verdict.label}</div>
+                <div style={{ fontSize:12, color:'#94a3b8', lineHeight:1.5 }}>{marketData.verdict.msg}</div>
+              </div>
+              {/* Bara saturație */}
+              <div style={{ marginBottom:10 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, color:'#475569', marginBottom:5 }}>
+                  <span>Afaceri cu site</span>
+                  <span style={{ fontWeight:700, color:'#94a3b8' }}>{marketData.saturationPct}%</span>
+                </div>
+                <div style={{ height:8, background:'rgba(255,255,255,0.06)', borderRadius:4, overflow:'hidden' }}>
+                  <div style={{ height:'100%', width:`${marketData.saturationPct}%`, background:'rgba(239,68,68,0.6)', borderRadius:4, transition:'width .6s ease' }} />
+                </div>
+                <div style={{ display:'flex', justifyContent:'space-between', fontSize:10, color:'#334155', marginTop:3 }}>
+                  <span>0% = toți liberi</span>
+                  <span>100% = toți au site</span>
+                </div>
+              </div>
+              {/* Numerele exacte */}
+              {[
+                { l:'Afaceri găsite total', v:`${marketData.totalFound}`, c:'#94a3b8' },
+                { l:'Au deja site', v:`${marketData.withWebsite}`, c:'#475569' },
+                { l:'Fără site (clienți tăi)', v:`${marketData.withoutWebsite}`, c:marketData.verdict.color },
+              ].map(r => (
+                <div key={r.l} style={{ display:'flex', justifyContent:'space-between', padding:'4px 0', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
+                  <span style={{ fontSize:11, color:'#475569' }}>{r.l}</span>
+                  <span style={{ fontSize:13, fontWeight:800, color:r.c }}>{r.v}</span>
+                </div>
+              ))}
+              {/* Sfat dinamic */}
+              {marketData.saturationPct > 60 && (
+                <div style={{ marginTop:10, padding:'8px 10px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:8, fontSize:11, color:'#fc8181', lineHeight:1.6 }}>
+                  ⚠️ Piață saturată. Încearcă alt oraș sau categorie pentru rezultate mai bune.
+                </div>
+              )}
+              {marketData.saturationPct <= 20 && (
+                <div style={{ marginTop:10, padding:'8px 10px', background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.2)', borderRadius:8, fontSize:11, color:'#4ade80', lineHeight:1.6 }}>
+                  💎 Goldmine! Ești primul freelancer care caută clienți aici. Trimite imediat!
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Stats */}
           {leads.length>0 && (
