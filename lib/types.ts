@@ -11,6 +11,10 @@ export interface Business {
   category_label: string
   city: string
   is_small_city: boolean
+  conversion_score: number    // 0-100, cât de probabil cumpără
+  score_label: string         // 'Hot' | 'Warm' | 'Maybe' | 'Cold'
+  score_color: string         // hex color
+  score_emoji: string         // 🔥 ⚡ 👍 ❄️
   contact_email: string
   generated_subject: string
   generated_body: string
