@@ -39,7 +39,6 @@ export const CITY_COORDINATES: Record<string, { lat: number; lng: number; radius
   'Slobozia':        { lat: 44.5642, lng: 27.3631, radius: 7000  },
   'Alexandria':      { lat: 43.9767, lng: 25.3342, radius: 7000  },
   'Vaslui':          { lat: 46.6411, lng: 27.7297, radius: 7000  },
-  'Deva':            { lat: 45.8833, lng: 22.9000, radius: 8000  },
   'Reșița':          { lat: 45.2961, lng: 21.8894, radius: 8000  },
   'Târgoviște':      { lat: 44.9272, lng: 25.4572, radius: 8000  },
   'Giurgiu':         { lat: 43.9000, lng: 25.9667, radius: 7000  },
@@ -143,7 +142,6 @@ export const CITY_COORDINATES: Record<string, { lat: number; lng: number; radius
   'Rădăuți':         { lat: 47.8453, lng: 25.9197, radius: 5000, isSmall: true },
   'Vatra Dornei':    { lat: 47.3556, lng: 25.3600, radius: 4000, isSmall: true },
   'Gura Humorului':  { lat: 47.5500, lng: 25.8833, radius: 4000, isSmall: true },
-  'Fălticeni':       { lat: 47.4583, lng: 26.3000, radius: 5000, isSmall: true },
   'Siret':           { lat: 47.9500, lng: 26.0667, radius: 3000, isSmall: true },
   'Solca':           { lat: 47.6833, lng: 25.8500, radius: 2500, isSmall: true },
   // Neamț
@@ -203,7 +201,6 @@ export const CITY_COORDINATES: Record<string, { lat: number; lng: number; radius
   'Bolintin-Vale':   { lat: 44.4500, lng: 25.7667, radius: 3000, isSmall: true },
   // Ialomița
   'Urziceni':        { lat: 44.7167, lng: 26.6333, radius: 4000, isSmall: true },
-  'Fetești':         { lat: 44.3739, lng: 27.8397, radius: 5000, isSmall: true },
   // Buzău
   'Râmnicu Sărat':   { lat: 45.3833, lng: 27.0500, radius: 5000, isSmall: true },
   'Pogoanele':       { lat: 45.0167, lng: 26.9833, radius: 3000, isSmall: true },
@@ -259,7 +256,6 @@ export const JUDETE: Record<string, string[]> = {
   'Vaslui':           ['Vaslui','Roman'],
   'Tulcea':           ['Tulcea','Măcin','Babadag','Sulina'],
   'Ilfov/Buc':        ['București'],
-  'Mureș':            ['Târgu Mureș','Reghin','Luduș','Sighișoara','Sovata'],
   'Sfântu Gheorghe':  ['Sfântu Gheorghe'],
   'Miercurea Ciuc':   ['Miercurea Ciuc'],
 }
