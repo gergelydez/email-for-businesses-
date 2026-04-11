@@ -24,11 +24,68 @@ interface PlaceDetails {
 function normalizePhoneForWhatsApp(phone: string): string {
   if (!phone) return ''
   const digits = phone.replace(/\D/g, '')
-  if (digits.startsWith('0') && digits.length === 10) {
-    return '40' + digits.slice(1)
-  }
+  if (digits.startsWith('0') && digits.length === 10) return '40' + digits.slice(1)
   if (digits.startsWith('40')) return digits
   return digits
+}
+
+// ── SCOR CONVERSIE 0-100 ─────────────────────────────────────────────────────
+// 5 semnale cu ponderi: recenzii(30) + rating(25) + sezon(20) + oraș mic(15) + WA(10)
+function calcConversionScore(
+  rating: number, reviews: number, category: string,
+  isSmallCity: boolean, hasWhatsApp: boolean
+): number {
+  let score = 0
+
+  // 1. RECENZII — afacere activă cu volum real de clienți
+  if      (reviews >= 100) score += 30
+  else if (reviews >= 50)  score += 24
+  else if (reviews >= 30)  score += 18
+  else if (reviews >= 15)  score += 12
+  else if (reviews >= 5)   score += 6
+  else                     score += 0
+
+  // 2. RATING — proprietar ambițios care investește în calitate
+  if      (rating >= 4.8) score += 25
+  else if (rating >= 4.5) score += 20
+  else if (rating >= 4.0) score += 14
+  else if (rating >= 3.5) score += 7
+  else if (rating >  0)   score += 3
+  else                    score += 8  // fără rating = afacere nouă, vrea să se stabilizeze
+
+  // 3. SEZONALITATE — urgență reală acum (Paști, vară, nunți etc.)
+  const month = new Date().getMonth() + 1
+  const seasonMap: Record<string, number[]> = {
+    bakery:       [3,4,11,12],
+    florist:      [2,3,4,5,11,12],
+    restaurant:   [3,4,5,6,7,8,12],
+    lodging:      [5,6,7,8,12,1],
+    photographer: [4,5,6,7,8,9,10],
+    beauty_salon: [3,4,5,6,9,10,11,12],
+    hair_care:    [3,4,5,6,9,10,11,12],
+    car_repair:   [3,4,10,11],
+    car_wash:     [3,4,5,6,7,8,9],
+    gym:          [1,2,8,9],
+    painter:      [4,5,6,7,8],
+    dentist:      [1,2,3,4,5,6,7,8,9,10,11,12],
+    doctor:       [1,2,3,4,5,6,7,8,9,10,11,12],
+  }
+  score += (seasonMap[category]?.includes(month)) ? 20 : 5
+
+  // 4. ORAȘ MIC — concurență zero, primul cu site câștigă tot
+  score += isSmallCity ? 15 : 0
+
+  // 5. WHATSAPP — proprietarul e direct accesibil
+  score += hasWhatsApp ? 10 : 0
+
+  return Math.min(100, Math.max(0, score))
+}
+
+function getScoreLabel(score: number): { label: string; color: string; emoji: string } {
+  if (score >= 80) return { label: 'Hot',   color: '#ef4444', emoji: '🔥' }
+  if (score >= 65) return { label: 'Warm',  color: '#f97316', emoji: '⚡' }
+  if (score >= 45) return { label: 'Maybe', color: '#eab308', emoji: '👍' }
+  return              { label: 'Cold',  color: '#64748b', emoji: '❄️' }
 }
 
 export async function POST(req: NextRequest) {
@@ -36,14 +93,10 @@ export async function POST(req: NextRequest) {
   const { city, category, googleApiKey: clientKey } = body
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY || clientKey
-  if (!apiKey) {
-    return NextResponse.json({ error: 'Lipsă Google Places API key' }, { status: 400 })
-  }
+  if (!apiKey) return NextResponse.json({ error: 'Lipsă Google Places API key' }, { status: 400 })
 
   const coords = CITY_COORDINATES[city]
-  if (!coords) {
-    return NextResponse.json({ error: `Oraș necunoscut: ${city}` }, { status: 400 })
-  }
+  if (!coords) return NextResponse.json({ error: `Oraș necunoscut: ${city}` }, { status: 400 })
 
   const nearbyUrl = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json')
   nearbyUrl.searchParams.set('location', `${coords.lat},${coords.lng}`)
@@ -67,18 +120,12 @@ export async function POST(req: NextRequest) {
     places.map(async (place) => {
       const detailUrl = new URL('https://maps.googleapis.com/maps/api/place/details/json')
       detailUrl.searchParams.set('place_id', place.place_id)
-      detailUrl.searchParams.set(
-        'fields',
-        'name,formatted_address,formatted_phone_number,international_phone_number,website,rating,user_ratings_total,business_status',
-      )
+      detailUrl.searchParams.set('fields',
+        'name,formatted_address,formatted_phone_number,international_phone_number,website,rating,user_ratings_total,business_status')
       detailUrl.searchParams.set('key', apiKey)
       detailUrl.searchParams.set('language', 'ro')
-      try {
-        const res = await fetch(detailUrl.toString())
-        return res.json()
-      } catch {
-        return {}
-      }
+      try { const res = await fetch(detailUrl.toString()); return res.json() }
+      catch { return {} }
     }),
   )
 
@@ -93,32 +140,44 @@ export async function POST(req: NextRequest) {
       )
     })
     .map(({ d, place }) => {
-      const r = d.result || {}
-      const phone = r.formatted_phone_number || ''
-      const intlPhone = r.international_phone_number || ''
+      const r        = d.result || {}
+      const phone    = r.formatted_phone_number || ''
+      const intlPhone= r.international_phone_number || ''
       const waNumber = normalizePhoneForWhatsApp(intlPhone || phone)
+      const rating   = r.rating || 0
+      const reviews  = r.user_ratings_total || 0
+      const isSmall  = coords.isSmall || false
+
+      const conversionScore = calcConversionScore(rating, reviews, category, isSmall, !!waNumber)
+      const { label, color, emoji } = getScoreLabel(conversionScore)
+
       return {
-        place_id:            place.place_id,
-        name:                r.name || place.name,
-        address:             r.formatted_address || '',
+        place_id:          place.place_id,
+        name:              r.name || place.name,
+        address:           r.formatted_address || '',
         phone,
-        phone_intl:          waNumber,
-        whatsapp_link:       waNumber ? `https://wa.me/${waNumber}` : '',
-        rating:              r.rating || 0,
-        reviews_count:       r.user_ratings_total || 0,
+        phone_intl:        waNumber,
+        whatsapp_link:     waNumber ? `https://wa.me/${waNumber}` : '',
+        rating,
+        reviews_count:     reviews,
         category,
-        category_label:      BUSINESS_CATEGORIES[category] || category,
+        category_label:    BUSINESS_CATEGORIES[category] || category,
         city,
-        is_small_city:       coords.isSmall || false,
-        contact_email:       '',
-        generated_subject:   '',
-        generated_body:      '',
-        generated_whatsapp:  '',
-        status:              'found',
-        contact_method:      waNumber ? 'whatsapp' : 'none',
-        created_at:          new Date().toISOString(),
+        is_small_city:     isSmall,
+        conversion_score:  conversionScore,
+        score_label:       label,
+        score_color:       color,
+        score_emoji:       emoji,
+        contact_email:     '',
+        generated_subject: '',
+        generated_body:    '',
+        generated_whatsapp:'',
+        status:            'found',
+        contact_method:    waNumber ? 'whatsapp' : 'none',
+        created_at:        new Date().toISOString(),
       }
     })
+    .sort((a, b) => b.conversion_score - a.conversion_score)
 
   return NextResponse.json({ businesses, total: businesses.length })
 }
