@@ -414,87 +414,346 @@ Returnează DOAR HTML complet începând cu <!DOCTYPE html>`
           </div>
         )}
 
-        {/* ── TAB 3: Demo site ── */}
+        {/* ── TAB 3: Demo site — Copiază Prompt ── */}
         {tab==='demo' && (
           <div>
-            <div style={{ background:'rgba(246,173,85,0.06)', border:'1px solid rgba(246,173,85,0.15)', borderRadius:12, padding:14, marginBottom:16 }}>
-              <div style={{ fontSize:12, color:'#f6ad55', fontWeight:700, marginBottom:6 }}>🎨 Demo site personalizat</div>
-              <div style={{ fontSize:13, color:'#94a3b8', lineHeight:1.7 }}>
-                AI generează un site complet cu <strong style={{ color:'#e2e8f0' }}>numele, tipul și datele reale</strong> ale acestei afaceri.
-                Descarcă HTML-ul și trimite-l pe WhatsApp ca atașament — sau urcă-l pe <strong style={{ color:'#e2e8f0' }}>tiiny.host</strong> și trimite linkul.
+            {/* Explicație flux */}
+            <div style={{ background:'rgba(246,173,85,0.07)', border:'1px solid rgba(246,173,85,0.2)', borderRadius:12, padding:16, marginBottom:16 }}>
+              <div style={{ fontSize:13, color:'#f6ad55', fontWeight:800, marginBottom:10 }}>🎨 Cum generezi demo-ul premium</div>
+              <div style={{ fontSize:13, color:'#94a3b8', lineHeight:1.9 }}>
+                <span style={{ color:'#f1f5f9', fontWeight:700 }}>1.</span> Apasă <strong style={{ color:'#fbbf24' }}>"Copiază Prompt Demo"</strong> de mai jos<br/>
+                <span style={{ color:'#f1f5f9', fontWeight:700 }}>2.</span> Deschide <strong style={{ color:'#63b3ed' }}>claude.ai</strong> în browser<br/>
+                <span style={{ color:'#f1f5f9', fontWeight:700 }}>3.</span> Dai <strong style={{ color:'#f1f5f9' }}>Paste</strong> și trimiți — demo-ul apare în 30 secunde<br/>
+                <span style={{ color:'#f1f5f9', fontWeight:700 }}>4.</span> Descarci HTML-ul și îl trimiți pe WhatsApp
               </div>
             </div>
 
-            {!demoHtml ? (
-              <div style={{ textAlign:'center', padding:'24px 0' }}>
-                <div style={{ fontSize:52, marginBottom:12 }}>🌐</div>
-                <div style={{ color:'#64748b', fontSize:13, marginBottom:20, lineHeight:1.7 }}>
-                  Claude AI construiește un site demo complet<br/>
-                  cu datele din Google Maps ale acestei afaceri.<br/>
-                  <span style={{ color:'#475569', fontSize:12 }}>⏱ Durează ~30 secunde</span>
-                </div>
-                <button onClick={generateDemo} disabled={demoLoading||!settings.anthropicApiKey}
-                  style={{ ...btnPrimary('#f6ad55','#ed8936'), width:'auto', padding:'14px 32px', display:'inline-block', fontSize:15, opacity:settings.anthropicApiKey?1:0.5 }}>
-                  {demoLoading?'⏳ Generez site demo... (~30s)':'🎨 Generează Demo Site Gratuit'}
-                </button>
-                {!settings.anthropicApiKey && <p style={{ color:'#fc8181', fontSize:11, marginTop:8 }}>Configurează API key în ⚙️ Setări</p>}
-                {demoLoading && (
-                  <div style={{ marginTop:16, color:'#64748b', fontSize:12 }}>
-                    AI construiește: header, servicii, galerie, contact, footer...<br/>
-                    <div style={{ width:200, height:3, background:'rgba(246,173,85,0.15)', borderRadius:3, margin:'10px auto 0' }}>
-                      <div style={{ height:3, background:'linear-gradient(90deg,#f6ad55,#ed8936)', borderRadius:3, width:'60%', animation:'none' }} />
-                    </div>
-                  </div>
-                )}
+            {/* Prompt preview */}
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#475569', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:8 }}>
+                Preview prompt generat
               </div>
-            ) : (
-              <>
-                <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
-                  <button onClick={downloadDemo}
-                    style={{ ...btnPrimary('#f6ad55','#ed8936'), flex:1, marginTop:0, padding:'11px', fontSize:13 }}>
-                    ⬇️ Descarcă HTML
-                  </button>
-                  <button onClick={async()=>{
-                    const msg = `Bună! Iată demo-ul site-ului pentru ${biz.name} — l-am pregătit special pentru voi 👆\n\nAșa ar arăta online. Site complet în ${settings.deliveryDays||5} zile, tot inclus.\n\nCum vi se pare direcția?\n\n${settings.senderName||'Alexandru'}${settings.yourPhone?'\n'+settings.yourPhone:''}`
-                    await copyText(msg,'demo')
-                    openWA(msg)
-                    onUpdate(biz.place_id,{conversation_stage:'demo_sent'})
-                  }} disabled={!biz.whatsapp_link}
-                    style={{ ...btnPrimary(), flex:1, marginTop:0, padding:'11px', fontSize:13, opacity:biz.whatsapp_link?1:0.4 }}>
-                    {copied==='demo'?'✅ Mesaj copiat!':'📱 Trimite pe WA'}
-                  </button>
-                  <button onClick={()=>generateDemo()} disabled={demoLoading}
-                    style={{ ...btnGhost, marginTop:0, padding:'11px 14px' }}>
-                    {demoLoading?'⏳':'🔄'}
-                  </button>
-                </div>
+              <div style={{ background:'rgba(6,13,26,0.8)', border:'1px solid rgba(99,179,237,0.12)', borderRadius:10, padding:14, fontSize:12, color:'#64748b', lineHeight:1.7, maxHeight:160, overflowY:'auto', fontFamily:'monospace' }}>
+                {`Generează un site web demo COMPLET, nivel senior front-end + senior UX/UI 2026, pentru:
 
-                {/* iFrame preview */}
-                <div style={{ border:'1px solid rgba(99,179,237,0.15)', borderRadius:12, overflow:'hidden', height:400 }}>
-                  <div style={{ background:'rgba(6,13,26,0.9)', padding:'8px 14px', display:'flex', alignItems:'center', gap:8, borderBottom:'1px solid rgba(99,179,237,0.1)' }}>
-                    <div style={{ display:'flex', gap:5 }}>
-                      {['#fc8181','#f6ad55','#4ade80'].map(c=><div key={c} style={{ width:10,height:10,borderRadius:'50%',background:c }} />)}
-                    </div>
-                    <div style={{ background:'rgba(255,255,255,0.05)', borderRadius:6, padding:'3px 12px', fontSize:11, color:'#475569', flex:1, textAlign:'center' }}>
-                      {biz.name.toLowerCase().replace(/\s+/g,'-')}.ro — DEMO
-                    </div>
-                  </div>
-                  <iframe ref={iframeRef} srcDoc={demoHtml} style={{ width:'100%', height:358, border:'none', display:'block' }} title="Demo site" />
-                </div>
+Afacere: ${biz.name}
+Tip: ${biz.category_label}
+Oraș: ${biz.city.replace(' 🏘️','')}
+Telefon: ${biz.phone}
+${biz.rating>0?`Rating Google: ${biz.rating}★ (${biz.reviews_count} recenzii)`:'Fără rating disponibil'}
+Adresă: ${biz.address||biz.city.replace(' 🏘️','')}
 
-                <div style={{ marginTop:12, padding:12, background:'rgba(246,173,85,0.06)', border:'1px solid rgba(246,173,85,0.15)', borderRadius:10 }}>
-                  <div style={{ fontSize:12, color:'#f6ad55', fontWeight:700, marginBottom:4 }}>💡 Cum trimiți demo-ul pe WhatsApp</div>
-                  <div style={{ fontSize:12, color:'#94a3b8', lineHeight:1.7 }}>
-                    <strong style={{ color:'#e2e8f0' }}>Varianta 1:</strong> Descarcă HTML → trimite fișierul ca atașament pe WA<br/>
-                    <strong style={{ color:'#e2e8f0' }}>Varianta 2:</strong> Urcă pe <a href="https://tiiny.host" target="_blank" rel="noreferrer" style={{ color:'#63b3ed' }}>tiiny.host</a> gratuit → trimite linkul (mai professional)
-                  </div>
-                </div>
-              </>
-            )}
+[...tehnici premium: mesh gradient, glassmorphism, 3D hover, reveal animations, hamburger menu, floating badges, pulse ring, noise texture, stats bar, gallery grid asimetric]`}
+              </div>
+            </div>
+
+            {/* Buton principal */}
+            <button onClick={()=>{
+              const cityClean = biz.city.replace(' 🏘️','')
+              const sName = settings.senderName || 'Alexandru'
+              const sPhone = settings.yourPhone || ''
+              const pFrom = settings.priceFrom || '500'
+              const pTo = settings.priceTo || '1500'
+              const days = settings.deliveryDays || '5'
+              const port = settings.yourPortfolio || ''
+
+              const COLOR_MAP: Record<string,string> = {
+                beauty_salon:'#9d4edd', hair_care:'#9d4edd', lodging:'#2d6a4f',
+                restaurant:'#d62828', bakery:'#c9a227', dentist:'#0077b6',
+                doctor:'#0077b6', car_repair:'#1b4332', photographer:'#1d3557',
+                gym:'#7209b7', florist:'#e63946', lawyer:'#1d3557',
+                accounting:'#1d4ed8', veterinary_care:'#386641',
+                moving_company:'#1d4ed8', physiotherapist:'#0077b6',
+                car_wash:'#1b4332', painter:'#6c3d14',
+              }
+              const color = COLOR_MAP[biz.category] || '#1d4ed8'
+              const domainSlug = biz.name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
+              const waLink = biz.phone_intl ? `https://wa.me/${biz.phone_intl}` : ''
+              const telRaw = biz.phone?.replace(/\s/g,'') || ''
+              const year = new Date().getFullYear()
+
+              const prompt = `Generează un site web demo COMPLET, single-file HTML, nivel senior front-end developer + senior UX/UI designer 2026. Site-ul trebuie să arate WOW — ca un produs livrat de o agenție premium internațională, nu un template generic AI.
+
+━━━ DATELE AFACERII ━━━
+Nume: ${biz.name}
+Tip: ${biz.category_label}
+Oraș: ${cityClean}
+Telefon: ${biz.phone || 'nedisponibil'}
+${biz.rating > 0 ? `Rating Google: ${biz.rating}★ (${biz.reviews_count} recenzii)` : 'Fără rating disponibil'}
+Adresă: ${biz.address || cityClean}
+${biz.is_small_city ? `Context: primul din ${cityClean} cu prezență online — avantaj enorm` : ''}
+Domeniu sugerat: ${domainSlug}.ro
+Telefon href: tel:${telRaw}
+${waLink ? `WhatsApp: ${waLink}` : ''}
+
+━━━ DATELE TALE ━━━
+Realizat de: ${sName}${sPhone ? ' · ' + sPhone : ''}
+Preț de la: ${pFrom} RON | Livrare: ${days} zile
+${port ? `Portofoliu: ${port}` : ''}
+
+━━━ IMAGINI — OBLIGATORIU Pexels CDN ━━━
+Format: https://images.pexels.com/photos/[ID]/pexels-photo-[ID].jpeg?auto=compress&cs=tinysrgb&w=[W]
+Alege ID-uri REALE și RELEVANTE pentru "${biz.category_label}":
+${(() => {
+  const pexMap: Record<string,string> = {
+    beauty_salon: '3993449,3992874,3997381,3065209,3764013,3764568,3993456,2681835,3997391',
+    hair_care: '3992874,3065209,3065171,3065172,1319460,3065173,1323550,3065174,2104062',
+    lodging: '164595,271624,1134176,2598638,258154,1743229,189296,1457842,2417842',
+    restaurant: '262978,1640777,67468,941861,1307698,3184183,2253643,958545,1267320',
+    bakery: '1070850,1775031,1126359,2693447,1729797,3926124,205961,1775032,1775033',
+    dentist: '3845810,3845811,3845746,5215997,4386466,3938023,3938024,3845812,5215998',
+    doctor: '3845810,5215997,4386466,3938023,4167541,5452255,3938024,4167542,5486649',
+    car_repair: '3807517,3807386,1592384,3807571,2244746,3807460,1635108,3807518,3807519',
+    photographer: '3062541,1264210,3184418,3379915,1983037,3184177,1264211,3379916,1983038',
+    gym: '841130,1552249,3253501,416778,2261482,1552106,841131,1552250,3253502',
+    florist: '931177,56866,1179156,2879219,931178,56867,1179157,2879220,931179',
+    lawyer: '3760263,3184291,1181534,3153201,3184292,1181535,3153202,3184293,3760264',
+    accounting: '3760263,3184291,1181534,3153201,3184292,3760264,1181535,3153202,3184293',
+    veterinary_care: '1108099,3628273,4587987,4473914,1108100,3628274,4587988,4473915,1108101',
+    moving_company: '4246163,4246164,4246165,1427107,4246166,1427108,4246167,1427109,4246168',
+    painter: '1249611,2219024,1396122,3637728,2098914,1541123,1249612,2219025,1396123',
+    car_wash: '3807517,2244746,3807460,1592384,3807386,2244747,3807518,1592385,3807519',
+    default: '1181671,1181534,3184291,3760263,1181535,3184292,3760264,1181536,3184293',
+  }
+  return pexMap[biz.category] || pexMap['default']
+})()}
+
+Distribuție poze:
+- Hero background: 1 poză w=1600 (prima din lista de mai sus)
+- Servicii: 6 poze w=800 diferite (relevante fiecărui serviciu specific)
+- About: 1 poză w=900
+- Galerie: 1 poză w=1000 + 4 poze w=600
+- Reviews hero: 1 poză w=1600 + 3 poze recenzii w=500
+- Contact: 1 poză w=900
+
+━━━ AESTHETIC DIRECTION ━━━
+${(() => {
+  const aesthetics: Record<string,string> = {
+    beauty_salon: `LUXURY EDITORIAL (Charlotte Tilbury, Vogue)
+- Fond: ivory #faf7f2 + dark #0e0c0a
+- Fonturi: Cormorant Garamond (display, italic, 300) + Montserrat (body, 300)
+- Accente: gold #c9a96e + rose #c8a99a
+- Hero: SPLIT SCREEN 50/50 (foto stânga, text dark dreapta)
+- Servicii: numerotare 01-06, border grid editorial, fără emoji
+- Ton: rafinat, liniștit, luxos`,
+    hair_care: `LUXURY EDITORIAL (Charlotte Tilbury, Vogue)
+- Fond: ivory #faf7f2 + dark #0e0c0a
+- Fonturi: Cormorant Garamond + Montserrat 300
+- Accente: gold #c9a96e + rose #c8a99a
+- Hero: SPLIT SCREEN
+- Numerotare 01-06, zero emoji în conținut`,
+    lodging: `BOUTIQUE HOTEL (Mr & Mrs Smith, Firmdale)
+- Fond: warm white #fefcf8 + forest #1a2e1a
+- Fonturi: Playfair Display italic + Lato 300
+- Accente: sage green #7d9e7d + warm gold #c9a040
+- Hero: FULL BLEED foto cu overlay text stânga
+- Carduri cu colțuri drepte, lux minimalist`,
+    restaurant: `WARM EDITORIAL (Bon Appétit, Ottolenghi)
+- Fond: cream #fffbf5 + charcoal #1c1c1c
+- Fonturi: Playfair Display + Lato 300
+- Accente: terracotta #c1440e + warm amber #e8c547
+- Hero: FULL BLEED foto cu overlay gradient
+- Cards edge-to-edge, fotografie dominantă`,
+    bakery: `ARTISAN WARMTH (Kinfolk, Little Flower)
+- Fond: off-white #fdf6ec + warm dark #1e1612
+- Fonturi: Libre Baskerville italic + Source Sans Pro 300
+- Accente: terracotta #c95c2c + honey #e8a835
+- Hero: FULL BLEED cu grain texture CSS overlay
+- Layout organic, carduri cu raze mari`,
+    dentist: `CLEAN CLINICAL PREMIUM (Forward Health, Tend)
+- Fond: pure white + soft azure #f0f7ff
+- Fonturi: DM Serif Display + DM Sans 300
+- Accente: deep teal #0d7377 + light aqua #84d2d7
+- Hero: SPLIT (text alb stânga, foto dreapta)
+- Design ultra-curat, spațiu alb generos`,
+    doctor: `CLINICAL TRUST (One Medical, Parsley Health)
+- Fond: white + soft blue #f0f6ff
+- Fonturi: DM Serif Display + DM Sans
+- Accente: deep blue #1e40af + mint #10b981
+- Hero: clean split, tipografie de încredere`,
+    car_repair: `INDUSTRIAL BOLD (Speedy, fast lane feel)
+- Fond: concrete #f4f4f2 + pitch black #111
+- Fonturi: Oswald 700 uppercase + Roboto 300
+- Accente: orange #ff6b35 + steel #64748b
+- Hero: FULL BLEED dramatic, text overlay supradimensionat
+- Energie, putere, precizie`,
+    photographer: `EDITORIAL DARK (Type A, Helmut Newton feel)
+- Fond: black #0a0a0a + off-white #f5f5f0
+- Fonturi: Bebas Neue titluri + Raleway 300 body
+- Accente: white + warm silver
+- Hero: FULL BLEED B&W cu text alb
+- Galerie dominantă, fotografia vorbește`,
+    gym: `ATHLETIC POWER (Nike, Peloton)
+- Fond: black #0a0a0a + white pur
+- Fonturi: Barlow Condensed 800 uppercase + Barlow 400
+- Accente: electric yellow #f5e642 + red #ef4444
+- Hero: FULL BLEED foto cu text supradimensionat alb
+- Energie, diagonal cuts, maximă intensitate`,
+    florist: `GARDEN LUXURY (Bloom & Wild, Tulipina)
+- Fond: blush white #fef9f7 + deep forest #1a2e1a
+- Fonturi: Cormorant Garamond italic + Montserrat 300
+- Accente: blush rose #e8a4a4 + deep green #2d5a27
+- Hero: SPLIT SCREEN cu foto florală
+- Elegant, feminin, organic`,
+    default: `PROFESSIONAL PREMIUM
+- Fond: white #ffffff + dark navy #0f172a
+- Fonturi: Merriweather + Inter 300
+- Accente: deep blue #1d4ed8 + gold #b8960c
+- Hero: SPLIT tipografic
+- Curat, de încredere, modern`,
+  }
+  return aesthetics[biz.category] || aesthetics['default']
+})()}
+
+━━━ STRUCTURA COMPLETĂ ━━━
+
+1. DEMO BANNER: gradient shimmer animat, text "Demo · ${biz.name} · ${cityClean} · ${days} zile de la ${pFrom} RON · ${sName}"
+
+2. NAVBAR glassmorphism: logo display font, links 11px uppercase letter-spacing, CTA button, hamburger → X animat
+
+3. MOBILE MENU: overlay dark, links display font 36-44px italic, fade-in animat
+
+4. HERO (adaptat aesthetic-ului ales):
+   - Foto Pexels full-bleed sau split-screen
+   - Ken Burns zoom pe imagine (scale 1.08→1.15, 16s infinite)
+   - Eyebrow label 11px uppercase
+   - H1 clamp(48px, 8vw, 96px) font display, weight 300, italic em
+   - Subtitlu 14px, opacity 0.65
+   - 2 butoane: primary solid + ghost
+   ${biz.rating > 0 ? `- Rating badge glassmorphism: ${biz.rating}★ · ${biz.reviews_count} recenzii` : ''}
+   - Scroll indicator animat (linie verticală + text rotit)
+   - fadeUp staggered pe toate elementele
+
+5. MARQUEE STRIP: dark background, serviciile iterate, font serif italic, animație continuă
+
+6. STATS BAR: translateY(-52px) overlapping, border grid, numere display font mari
+   Stats relevante: ${biz.rating > 0 ? `${biz.reviews_count}+ recenzii, ${biz.rating}★ rating` : '4 statistici relevanate domeniului'}
+
+7. SERVICII editorial: 6 servicii specifice domeniului "${biz.category_label}"
+   - Layout grid asimetric (primul card span 2 rânduri)
+   - Foto Pexels + zoom hover + overlay
+   - Numerotare 01-06, ZERO emoji, "Descoperă →" link
+
+8. DESPRE NOI split: foto cu 2 floating badges animate + text cu 4 features linie decorativă
+
+9. GALERIE masonry: 3 col × 2 rânduri, prima foto span 2, caption italic hover
+
+10. RECENZII: hero foto full-width cu rating suprapus + grid 3 cards cu foto mică sus
+
+11. CONTACT split: foto stânga, dark dreapta, telefon mare, WhatsApp SVG (fără emoji), 3 info rows
+
+12. FOOTER dark: 4 coloane grid, brand italic, links, contact, bottom bar cu domeniu
+
+━━━ TEHNICI OBLIGATORII ━━━
+- Google Fonts import (fonturile din aesthetic)
+- Custom cursor cu lag (desktop, mix-blend-mode:difference)
+- IntersectionObserver reveal: .rv fadeUp, .rv-left, .rv-right
+- Navbar .scrolled shadow
+- Image fade-in on load (opacity 0→1) + error fallback gradient
+- Smooth scroll cu offset navbar
+- ZERO emoji în conținut (linii decorative, numere, SVG în loc)
+- WhatsApp cu SVG logo inline, nu emoji
+
+━━━ OUTPUT ━━━
+Returnează DOAR HTML complet. Prima linie: <!DOCTYPE html>
+Fără backticks, fără explicații.`
+
+              navigator.clipboard.writeText(prompt).then(()=>{
+                alert('✅ Prompt copiat!\n\nDeschide claude.ai și dă Paste!')
+              }).catch(()=>{
+                // Fallback: show in textarea
+                const ta = document.createElement('textarea')
+                ta.value = prompt
+                document.body.appendChild(ta)
+                ta.select()
+                document.execCommand('copy')
+                document.body.removeChild(ta)
+                alert('✅ Prompt copiat! Deschide claude.ai și dă Paste!')
+              })
+              onUpdate(biz.place_id, { conversation_stage:'demo_sent' })
+            }}
+            style={{ ...btnPrimary('#f6ad55','#ed8936'), padding:'16px', fontSize:16, fontWeight:800 }}>
+              📋 Copiază Prompt Demo pentru Claude.ai
+            </button>
+
+            <div style={{ marginTop:10, padding:12, background:'rgba(99,179,237,0.06)', border:'1px solid rgba(99,179,237,0.12)', borderRadius:10 }}>
+              <div style={{ fontSize:12, color:'#94a3b8', lineHeight:1.8 }}>
+                <strong style={{ color:'#63b3ed' }}>De ce mai rapid?</strong> Claude.ai generează direct în chat fără limite de timeout. Demo-ul apare în 30 secunde și îl descarci instant.
+              </div>
+            </div>
           </div>
         )}
       </div>
     </Modal>
+  )
+}
+
+// ─── Score breakdown helper ─────────────────────────────────────────────────
+function ScoreBreakdown({ biz }: { biz: Business }) {
+  const [show, setShow] = useState(false)
+  const score = biz.conversion_score || 0
+  const month = new Date().getMonth() + 1
+
+  const SEASONAL: Record<string,number[]> = {
+    bakery:[3,4,11,12],florist:[2,3,4,5,11,12],restaurant:[3,4,5,6,7,8,12],
+    lodging:[5,6,7,8,12,1],photographer:[4,5,6,7,8,9,10],
+    beauty_salon:[3,4,5,6,9,10,11,12],hair_care:[3,4,5,6,9,10,11,12],
+    car_repair:[3,4,10,11],car_wash:[3,4,5,6,7,8,9],gym:[1,2,8,9],
+    painter:[4,5,6,7,8],dentist:[1,2,3,4,5,6,7,8,9,10,11,12],
+  }
+  const inSeason = SEASONAL[biz.category]?.includes(month)
+
+  // Reconstruct individual points
+  const pts = {
+    reviews: biz.reviews_count>=100?30:biz.reviews_count>=50?24:biz.reviews_count>=30?18:biz.reviews_count>=15?12:biz.reviews_count>=5?6:0,
+    rating:  biz.rating>=4.8?25:biz.rating>=4.5?20:biz.rating>=4.0?14:biz.rating>=3.5?7:biz.rating>0?3:8,
+    season:  inSeason?20:5,
+    city:    biz.is_small_city?15:0,
+    wa:      biz.whatsapp_link?10:0,
+  }
+
+  return (
+    <div style={{ position:'relative', display:'inline-block' }}>
+      <button
+        onClick={()=>setShow(!show)}
+        style={{ background:'none', border:'none', cursor:'pointer', padding:'0 2px', fontSize:11, color:'#334155', fontWeight:600, lineHeight:1 }}
+        title="Vezi detalii scor"
+      >
+        {score} ⓘ
+      </button>
+      {show && (
+        <div style={{
+          position:'absolute', bottom:'calc(100% + 6px)', right:0, zIndex:50,
+          background:'#0f1a2e', border:'1px solid rgba(99,179,237,0.2)',
+          borderRadius:10, padding:12, width:220, boxShadow:'0 8px 32px rgba(0,0,0,0.5)'
+        }}>
+          <div style={{ fontSize:11, fontWeight:800, color:'#f1f5f9', marginBottom:8 }}>
+            Scor conversie: {score}/100
+          </div>
+          {[
+            { label:'Recenzii Google', pts:pts.reviews, max:30, note:`${biz.reviews_count} recenzii` },
+            { label:'Rating',         pts:pts.rating,  max:25, note:biz.rating>0?`${biz.rating}★`:'fără rating' },
+            { label:'Sezon acum',     pts:pts.season,  max:20, note:inSeason?'în sezon ✓':'off-season' },
+            { label:'Oraș mic',       pts:pts.city,    max:15, note:biz.is_small_city?'concurență zero ✓':'oraș mare' },
+            { label:'WhatsApp',       pts:pts.wa,      max:10, note:biz.whatsapp_link?'disponibil ✓':'lipsă' },
+          ].map(r=>(
+            <div key={r.label} style={{ marginBottom:6 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:2 }}>
+                <span style={{ fontSize:11, color:'#94a3b8' }}>{r.label}</span>
+                <span style={{ fontSize:11, fontWeight:700, color: r.pts===r.max?'#4ade80':r.pts>0?'#f6ad55':'#475569' }}>
+                  {r.pts}/{r.max}
+                </span>
+              </div>
+              <div style={{ height:3, background:'rgba(255,255,255,0.06)', borderRadius:2, overflow:'hidden' }}>
+                <div style={{ height:'100%', width:`${(r.pts/r.max)*100}%`, background: r.pts===r.max?'#4ade80':r.pts>0?'#f6ad55':'transparent', borderRadius:2 }} />
+              </div>
+              <div style={{ fontSize:10, color:'#334155', marginTop:1 }}>{r.note}</div>
+            </div>
+          ))}
+          <button onClick={()=>setShow(false)} style={{ position:'absolute',top:6,right:8,background:'none',border:'none',color:'#334155',cursor:'pointer',fontSize:14 }}>✕</button>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -504,19 +763,28 @@ function LeadCard({ biz, settings, onUpdate, onDelete }:
   const [open, setOpen] = useState(false)
   const [sl,ssl] = STAGE_LABELS[biz.conversation_stage||'new']||['⬜','Nou']
 
-  const borderColor = biz.conversation_stage==='closed_won' ? 'rgba(74,222,128,0.3)'
-    : biz.conversation_stage==='replied'||biz.conversation_stage==='negotiating' ? 'rgba(246,173,85,0.35)'
-    : biz.is_small_city ? 'rgba(246,173,85,0.2)'
-    : 'rgba(99,179,237,0.1)'
+  const score = biz.conversion_score || 0
+
+  // Border color: stage overrides score
+  const borderColor = biz.conversation_stage==='closed_won'   ? 'rgba(74,222,128,0.4)'
+    : biz.conversation_stage==='replied'||biz.conversation_stage==='negotiating' ? 'rgba(246,173,85,0.4)'
+    : score>=80 ? 'rgba(239,68,68,0.35)'
+    : score>=65 ? 'rgba(249,115,22,0.25)'
+    : score>=45 ? 'rgba(234,179,8,0.2)'
+    : 'rgba(99,179,237,0.08)'
+
+  // Glow for hot leads
+  const boxShadow = score>=80 && biz.conversation_stage==='new'
+    ? '0 0 16px rgba(239,68,68,0.12)' : 'none'
 
   return (
     <>
-      <div style={{ background:'rgba(13,22,41,0.85)', border:`1px solid ${borderColor}`, borderRadius:14, padding:16 }}>
+      <div style={{ background:'rgba(13,22,41,0.9)', border:`1px solid ${borderColor}`, borderRadius:14, padding:16, boxShadow }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8, marginBottom:10 }}>
           <div style={{ flex:1, minWidth:0 }}>
             <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:3 }}>
               <span style={{ fontWeight:700, color:'#f1f5f9', fontSize:14 }}>{biz.name}</span>
-              {biz.is_small_city && <span>🏘️</span>}
+              {biz.is_small_city && <span title="Oraș mic — concurență zero">🏘️</span>}
               {tag(
                 biz.conversation_stage==='closed_won' ? '#4ade80'
                 : biz.conversation_stage==='replied'||biz.conversation_stage==='negotiating' ? '#f6ad55'
@@ -529,6 +797,30 @@ function LeadCard({ biz, settings, onUpdate, onDelete }:
           </div>
           <button onClick={()=>onDelete(biz.place_id)} style={{ background:'none',border:'none',color:'#2d3f5a',cursor:'pointer',fontSize:16 }}>✕</button>
         </div>
+
+        {/* Scor conversie */}
+        {score > 0 ? (
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+            <div style={{ flex:1, height:4, background:'rgba(255,255,255,0.06)', borderRadius:2, overflow:'hidden' }}>
+              <div style={{
+                height:'100%', borderRadius:2,
+                width:`${score}%`,
+                background: score>=80 ? 'linear-gradient(90deg,#ef4444,#f97316)'
+                  : score>=65 ? 'linear-gradient(90deg,#f97316,#eab308)'
+                  : score>=45 ? 'linear-gradient(90deg,#eab308,#84cc16)'
+                  : 'rgba(100,116,139,0.4)',
+                transition:'width .6s ease',
+              }} />
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:4, flexShrink:0 }}>
+              <span style={{ fontSize:12 }}>{biz.score_emoji||'❄️'}</span>
+              <span style={{ fontSize:11, fontWeight:800, color:biz.score_color||'#64748b' }}>{biz.score_label||'Cold'}</span>
+              <ScoreBreakdown biz={biz} />
+            </div>
+          </div>
+        ) : (
+          <div style={{ fontSize:10, color:'#1e293b', marginBottom:8 }}>Scor indisponibil — re-caută lead-ul</div>
+        )}
 
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, flexWrap:'wrap' }}>
           <span style={{ fontSize:12, color:'#94a3b8' }}>📞 {biz.phone}</span>
@@ -588,10 +880,55 @@ export default function LeadsPage() {
   const [judet, setJudet]       = useState('Cluj')
   const [searching, setSearching] = useState(false)
   const [searchError, setSearchError] = useState('')
-  const [filter, setFilter]     = useState<'all'|'found'|'sent'|'replied'|'demo'|'won'>('all')
+  const [filter, setFilter]     = useState<'all'|'hot'|'found'|'sent'|'replied'|'demo'|'won'>('all')
   const [genProgress, setGenProgress] = useState<{done:number,total:number}|null>(null)
 
-  useEffect(() => { setLeads(getLeads()); setSettings(getSettings()) }, [])
+  useEffect(() => {
+    const raw = getLeads()
+
+    // Migrare automată: leads vechi fără scor primesc scor calculat client-side
+    const SEASONAL: Record<string,number[]> = {
+      bakery:[3,4,11,12],florist:[2,3,4,5,11,12],restaurant:[3,4,5,6,7,8,12],
+      lodging:[5,6,7,8,12,1],photographer:[4,5,6,7,8,9,10],
+      beauty_salon:[3,4,5,6,9,10,11,12],hair_care:[3,4,5,6,9,10,11,12],
+      car_repair:[3,4,10,11],car_wash:[3,4,5,6,7,8,9],gym:[1,2,8,9],
+      painter:[4,5,6,7,8],dentist:[1,2,3,4,5,6,7,8,9,10,11,12],
+    }
+    const month = new Date().getMonth()+1
+
+    const migrated = raw.map(b => {
+      if (b.conversion_score) return b  // già ha scor, skip
+      const reviews = b.reviews_count||0
+      const rating  = b.rating||0
+      const inSeason = SEASONAL[b.category]?.includes(month)
+      const hasWA = !!b.whatsapp_link
+      const isSmall = !!b.is_small_city
+
+      let score = 0
+      score += reviews>=100?30:reviews>=50?24:reviews>=30?18:reviews>=15?12:reviews>=5?6:0
+      score += rating>=4.8?25:rating>=4.5?20:rating>=4.0?14:rating>=3.5?7:rating>0?3:8
+      score += inSeason?20:5
+      score += isSmall?15:0
+      score += hasWA?10:0
+      score = Math.min(100, score)
+
+      const label = score>=80?'Hot':score>=65?'Warm':score>=45?'Maybe':'Cold'
+      const color = score>=80?'#ef4444':score>=65?'#f97316':score>=45?'#eab308':'#64748b'
+      const emoji = score>=80?'🔥':score>=65?'⚡':score>=45?'👍':'❄️'
+
+      return { ...b, conversion_score:score, score_label:label, score_color:color, score_emoji:emoji }
+    })
+
+    // Salvează migrarea și sortează după scor
+    if (migrated.some((b,i) => !raw[i]?.conversion_score)) {
+      const { saveLeads } = require('@/lib/storage')
+      saveLeads(migrated)
+    }
+
+    const sorted = [...migrated].sort((a,b) => (b.conversion_score||0)-(a.conversion_score||0))
+    setLeads(sorted)
+    setSettings(getSettings())
+  }, [])
 
   function handleUpdate(id: string, updates: Partial<Business>) {
     updateLead(id, updates)
@@ -653,6 +990,7 @@ export default function LeadsPage() {
 
   const filtered = leads.filter(l => {
     if (filter==='all')     return true
+    if (filter==='hot')     return (l.conversion_score||0) >= 80
     if (filter==='found')   return l.conversation_stage==='new'||l.conversation_stage==='sent_opening'
     if (filter==='replied') return l.conversation_stage==='replied'||l.conversation_stage==='negotiating'
     if (filter==='demo')    return l.conversation_stage==='demo_sent'||l.demo_status==='ready'
@@ -662,6 +1000,7 @@ export default function LeadsPage() {
   })
 
   const counts = {
+    hot:     leads.filter(l=>(l.conversion_score||0)>=80).length,
     replied: leads.filter(l=>l.conversation_stage==='replied'||l.conversation_stage==='negotiating').length,
     won:     leads.filter(l=>l.conversation_stage==='closed_won').length,
     demo:    leads.filter(l=>l.demo_status==='ready').length,
@@ -743,6 +1082,7 @@ export default function LeadsPage() {
               <div style={{ fontWeight:700, color:'#f1f5f9', fontSize:13, marginBottom:12 }}>📊 Pipeline</div>
               {[
                 {l:'Total leads',v:leads.length,c:'#63b3ed'},
+                {l:'🔥 Hot leads (80+)',v:counts.hot,c:'#ef4444'},
                 {l:'📱 Cu WhatsApp',v:leads.filter(l=>l.whatsapp_link).length,c:'#25D366'},
                 {l:'📤 Mesaje trimise',v:counts.sent,c:'#63b3ed'},
                 {l:'💬 Au răspuns',v:counts.replied,c:'#f6ad55'},
@@ -786,21 +1126,36 @@ export default function LeadsPage() {
           {leads.length>0 && (
             <div style={{ display:'flex', gap:6, marginBottom:14, flexWrap:'wrap' }}>
               {([
-                {k:'all',   l:`Toate (${leads.length})`},
-                {k:'found', l:`Noi (${leads.filter(l=>l.conversation_stage==='new'||l.conversation_stage==='sent_opening').length})`},
+                {k:'all',    l:`Toate (${leads.length})`},
+                {k:'hot',    l:`🔥 Hot (${leads.filter(l=>(l.conversion_score||0)>=80).length})`, hot:true},
+                {k:'found',  l:`Noi (${leads.filter(l=>l.conversation_stage==='new'||l.conversation_stage==='sent_opening').length})`},
                 {k:'replied',l:`💬 Răspuns (${counts.replied})`, hot:counts.replied>0},
-                {k:'demo',  l:`🎨 Demo (${counts.demo})`},
-                {k:'won',   l:`✅ Câștigați (${counts.won})`},
+                {k:'demo',   l:`🎨 Demo (${counts.demo})`},
+                {k:'won',    l:`✅ Câștigați (${counts.won})`},
               ] as {k:string,l:string,hot?:boolean}[]).map(f=>(
                 <button key={f.k} onClick={()=>setFilter(f.k as typeof filter)}
                   style={{ padding:'6px 12px', borderRadius:20, fontWeight:700, fontSize:12, cursor:'pointer', whiteSpace:'nowrap',
-                    background: filter===f.k ? (f.hot?'rgba(246,173,85,0.25)':'rgba(99,179,237,0.2)') : 'rgba(255,255,255,0.04)',
-                    color: filter===f.k ? (f.hot?'#f6ad55':'#63b3ed') : '#475569',
-                    boxShadow: f.hot&&filter!==f.k ? '0 0 10px rgba(246,173,85,0.2)' : 'none',
-                    border: f.hot&&filter!==f.k ? '1px solid rgba(246,173,85,0.3)' : '1px solid transparent' }}>
+                    background: filter===f.k
+                      ? f.k==='hot' ? 'rgba(239,68,68,0.25)' : f.hot ? 'rgba(246,173,85,0.25)' : 'rgba(99,179,237,0.2)'
+                      : 'rgba(255,255,255,0.04)',
+                    color: filter===f.k
+                      ? f.k==='hot' ? '#ef4444' : f.hot ? '#f6ad55' : '#63b3ed'
+                      : f.k==='hot' ? '#ef444488' : '#475569',
+                    boxShadow: f.k==='hot'&&filter!==f.k ? '0 0 12px rgba(239,68,68,0.2)' : f.hot&&filter!==f.k ? '0 0 10px rgba(246,173,85,0.2)' : 'none',
+                    border: f.k==='hot' ? '1px solid rgba(239,68,68,0.3)' : f.hot&&filter!==f.k ? '1px solid rgba(246,173,85,0.3)' : '1px solid transparent' }}>
                   {f.l}
                 </button>
               ))}
+            </div>
+          )}
+          {/* Scor info */}
+          {leads.length>0 && (
+            <div style={{ display:'flex', gap:6, marginBottom:14, flexWrap:'wrap', alignItems:'center' }}>
+              <span style={{ fontSize:11, color:'#334155', fontWeight:600 }}>Scor conversie:</span>
+              {[{e:'🔥',l:'Hot 80+',c:'#ef4444'},{e:'⚡',l:'Warm 65+',c:'#f97316'},{e:'👍',l:'Maybe 45+',c:'#eab308'},{e:'❄️',l:'Cold',c:'#64748b'}].map(s=>(
+                <span key={s.l} style={{ fontSize:11, color:s.c, fontWeight:600 }}>{s.e} {s.l}</span>
+              ))}
+              <span style={{ fontSize:11, color:'#1e293b' }}>· sortat automat</span>
             </div>
           )}
 
