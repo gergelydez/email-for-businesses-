@@ -129,6 +129,31 @@ export async function POST(req: NextRequest) {
     }),
   )
 
+  // ── MARKET SATURATION ANALYSIS ──────────────────────────────────────────
+  // Câte afaceri EXISTĂ total vs câte NU au site = saturația pieței
+  const allActive = detailsResults.filter(d => {
+    const r = d.result || {}
+    return r.business_status !== 'CLOSED_PERMANENTLY' &&
+      (r.formatted_phone_number || r.international_phone_number)
+  })
+  const totalFound     = allActive.length
+  const withWebsite    = allActive.filter(d => !!d.result?.website).length
+  const withoutWebsite = totalFound - withWebsite
+  const saturationPct  = totalFound > 0 ? Math.round((withWebsite / totalFound) * 100) : 0
+  const opportunityPct = 100 - saturationPct
+
+  const marketVerdict =
+    saturationPct <= 20 ? { label:'Goldmine', emoji:'💎', color:'#4ade80',
+      msg:`${opportunityPct}% fără site — concurență minimă, tu ești primul` }
+    : saturationPct <= 40 ? { label:'Excelent', emoji:'🔥', color:'#f97316',
+      msg:`${opportunityPct}% fără site — piață activă cu mulți clienți potențiali` }
+    : saturationPct <= 60 ? { label:'Bun',      emoji:'⚡', color:'#eab308',
+      msg:`${opportunityPct}% fără site — merită, dar concurența există` }
+    : saturationPct <= 80 ? { label:'Mediu',    emoji:'👍', color:'#64748b',
+      msg:`Doar ${opportunityPct}% fără site — piață parțial saturată` }
+    :                       { label:'Saturat',  emoji:'❄️', color:'#ef4444',
+      msg:`Doar ${opportunityPct}% fără site — schimbă categoria sau orașul` }
+
   const businesses = detailsResults
     .map((d, i) => ({ d, place: places[i] }))
     .filter(({ d }) => {
@@ -179,5 +204,16 @@ export async function POST(req: NextRequest) {
     })
     .sort((a, b) => b.conversion_score - a.conversion_score)
 
-  return NextResponse.json({ businesses, total: businesses.length })
+  return NextResponse.json({
+    businesses,
+    total: businesses.length,
+    market: {
+      totalFound,
+      withWebsite,
+      withoutWebsite,
+      saturationPct,
+      opportunityPct,
+      verdict: marketVerdict,
+    }
+  })
 }
